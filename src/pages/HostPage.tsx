@@ -4,6 +4,7 @@ import { useSocket } from '../hooks/useSocket'
 import { createSessionId } from '../lib/session'
 import type { MotionData, NetworkInfo } from '../types/motion'
 import { LightsaberView } from '../components/LightsaberView'
+import { RhythmGame } from '../game/RhythmGame'
 import './HostPage.css'
 
 export function HostPage() {
@@ -220,11 +221,15 @@ export function HostPage() {
         )}
 
         <main className="arena">
-          <LightsaberView
-            motion={motion}
-            connected={controllerConnected}
-            beatMode={controllerConnected}
-          />
+          {controllerConnected ? (
+            <RhythmGame motion={motion} />
+          ) : (
+            <LightsaberView
+              motion={motion}
+              connected={controllerConnected}
+              beatMode={false}
+            />
+          )}
         </main>
       </div>
     </div>

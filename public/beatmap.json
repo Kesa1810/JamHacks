@@ -1,0 +1,1357 @@
+{
+  "song": "Justin Bieber - Beauty And A Beat (Lyrics) ft. Nicki Minaj - Cakes & Eclairs (128k)",
+  "laneCount": 3,
+  "generatedBy": "energy detection + human tidy-up",
+  "notes": [
+    {
+      "time": 0.4,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 1.42,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 1.84,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 3.62,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 4.2,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 4.58,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 5.14,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 5.58,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 6.02,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 6.56,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 6.86,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 7.6,
+      "lane": 1,
+      "direction": "up"
+    },
+    {
+      "time": 8.1,
+      "lane": 1,
+      "direction": "up"
+    },
+    {
+      "time": 8.56,
+      "lane": 2,
+      "direction": "left"
+    },
+    {
+      "time": 9.02,
+      "lane": 2,
+      "direction": "left"
+    },
+    {
+      "time": 9.5,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 9.96,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 10.42,
+      "lane": 2,
+      "direction": "left"
+    },
+    {
+      "time": 10.9,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 11.36,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 11.84,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 12.32,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 12.78,
+      "lane": 2,
+      "direction": "left"
+    },
+    {
+      "time": 13.24,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 13.72,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 14.2,
+      "lane": 2,
+      "direction": "left"
+    },
+    {
+      "time": 14.64,
+      "lane": 2,
+      "direction": "left"
+    },
+    {
+      "time": 15.12,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 15.58,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 16.06,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 16.52,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 17,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 17.46,
+      "lane": 0,
+      "direction": "up"
+    },
+    {
+      "time": 17.94,
+      "lane": 0,
+      "direction": "up"
+    },
+    {
+      "time": 18.4,
+      "lane": 1,
+      "direction": "right"
+    },
+    {
+      "time": 18.86,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 19.36,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 19.82,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 20.28,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 20.76,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 21.22,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 21.7,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 22.14,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 22.62,
+      "lane": 1,
+      "direction": "up"
+    },
+    {
+      "time": 23.08,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 23.56,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 24.02,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 24.5,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 24.96,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 25.44,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 25.9,
+      "lane": 1,
+      "direction": "up"
+    },
+    {
+      "time": 26.4,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 26.84,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 27.32,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 27.78,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 28.26,
+      "lane": 1,
+      "direction": "right"
+    },
+    {
+      "time": 28.74,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 29.18,
+      "lane": 1,
+      "direction": "up"
+    },
+    {
+      "time": 29.64,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 30.1,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 30.6,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 31.04,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 31.52,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 32,
+      "lane": 1,
+      "direction": "up"
+    },
+    {
+      "time": 32.46,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 32.94,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 33.4,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 33.88,
+      "lane": 2,
+      "direction": "left"
+    },
+    {
+      "time": 34.82,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 35.76,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 36.68,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 37.14,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 37.62,
+      "lane": 2,
+      "direction": "left"
+    },
+    {
+      "time": 38.1,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 39.02,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 39.5,
+      "lane": 1,
+      "direction": "up"
+    },
+    {
+      "time": 39.96,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 40.44,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 40.9,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 41.36,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 42.3,
+      "lane": 0,
+      "direction": "up"
+    },
+    {
+      "time": 43.24,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 43.74,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 44.2,
+      "lane": 0,
+      "direction": "up"
+    },
+    {
+      "time": 44.66,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 45.16,
+      "lane": 0,
+      "direction": "up"
+    },
+    {
+      "time": 45.9,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 50,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 52.38,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 53.76,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 54.7,
+      "lane": 1,
+      "direction": "right"
+    },
+    {
+      "time": 59.9,
+      "lane": 0,
+      "direction": "up"
+    },
+    {
+      "time": 60.1,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 63.42,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 64.34,
+      "lane": 1,
+      "direction": "right"
+    },
+    {
+      "time": 64.8,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 65.28,
+      "lane": 0,
+      "direction": "up"
+    },
+    {
+      "time": 66.7,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 67.16,
+      "lane": 0,
+      "direction": "up"
+    },
+    {
+      "time": 68.1,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 73.72,
+      "lane": 1,
+      "direction": "right"
+    },
+    {
+      "time": 74.2,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 75.12,
+      "lane": 0,
+      "direction": "up"
+    },
+    {
+      "time": 75.6,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 76.06,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 76.52,
+      "lane": 2,
+      "direction": "left"
+    },
+    {
+      "time": 76.98,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 77.46,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 77.94,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 78.42,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 78.88,
+      "lane": 2,
+      "direction": "left"
+    },
+    {
+      "time": 79.34,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 79.8,
+      "lane": 1,
+      "direction": "right"
+    },
+    {
+      "time": 80.28,
+      "lane": 1,
+      "direction": "up"
+    },
+    {
+      "time": 80.74,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 81.24,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 82.16,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 82.62,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 83.56,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 84.02,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 84.48,
+      "lane": 0,
+      "direction": "up"
+    },
+    {
+      "time": 84.72,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 84.96,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 85.42,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 86.02,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 86.36,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 86.84,
+      "lane": 1,
+      "direction": "right"
+    },
+    {
+      "time": 87.88,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 88.22,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 88.42,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 88.72,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 89.2,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 89.64,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 90.12,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 90.58,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 91.06,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 91.52,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 92,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 92.46,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 92.94,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 93.4,
+      "lane": 2,
+      "direction": "left"
+    },
+    {
+      "time": 93.88,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 94.82,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 95.28,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 95.76,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 96.22,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 96.7,
+      "lane": 2,
+      "direction": "left"
+    },
+    {
+      "time": 97.14,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 97.62,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 98.1,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 98.56,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 99.02,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 99.5,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 99.96,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 100.44,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 100.9,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 101.36,
+      "lane": 1,
+      "direction": "up"
+    },
+    {
+      "time": 101.86,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 102.32,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 102.78,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 103.26,
+      "lane": 1,
+      "direction": "up"
+    },
+    {
+      "time": 104.2,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 104.66,
+      "lane": 2,
+      "direction": "left"
+    },
+    {
+      "time": 105.1,
+      "lane": 0,
+      "direction": "up"
+    },
+    {
+      "time": 105.6,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 106.04,
+      "lane": 0,
+      "direction": "up"
+    },
+    {
+      "time": 106.52,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 107,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 107.94,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 108.88,
+      "lane": 1,
+      "direction": "right"
+    },
+    {
+      "time": 110.76,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 112.14,
+      "lane": 1,
+      "direction": "right"
+    },
+    {
+      "time": 112.62,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 114.02,
+      "lane": 2,
+      "direction": "left"
+    },
+    {
+      "time": 114.5,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 115.44,
+      "lane": 2,
+      "direction": "left"
+    },
+    {
+      "time": 115.92,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 116.38,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 116.84,
+      "lane": 1,
+      "direction": "up"
+    },
+    {
+      "time": 118.26,
+      "lane": 0,
+      "direction": "up"
+    },
+    {
+      "time": 118.74,
+      "lane": 1,
+      "direction": "up"
+    },
+    {
+      "time": 119.66,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 120.16,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 120.6,
+      "lane": 0,
+      "direction": "up"
+    },
+    {
+      "time": 122.22,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 125.66,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 128.76,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 129.72,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 130.68,
+      "lane": 2,
+      "direction": "left"
+    },
+    {
+      "time": 134.4,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 134.88,
+      "lane": 0,
+      "direction": "up"
+    },
+    {
+      "time": 135.1,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 137.48,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 138.64,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 139.34,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 139.8,
+      "lane": 0,
+      "direction": "up"
+    },
+    {
+      "time": 141.22,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 141.7,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 142.16,
+      "lane": 1,
+      "direction": "up"
+    },
+    {
+      "time": 144.06,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 144.5,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 145.9,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 146.38,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 147.3,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 149.44,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 150.12,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 150.82,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 152,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 152.74,
+      "lane": 0,
+      "direction": "up"
+    },
+    {
+      "time": 153.88,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 154.58,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 155.78,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 158.32,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 159.54,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 160.24,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 161.38,
+      "lane": 1,
+      "direction": "right"
+    },
+    {
+      "time": 162.1,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 163.02,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 165.12,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 167.02,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 167.72,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 168.88,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 169.58,
+      "lane": 0,
+      "direction": "down"
+    },
+    {
+      "time": 170.52,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 170.74,
+      "lane": 1,
+      "direction": "right"
+    },
+    {
+      "time": 172.64,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 173.32,
+      "lane": 1,
+      "direction": "up"
+    },
+    {
+      "time": 174.24,
+      "lane": 1,
+      "direction": "right"
+    },
+    {
+      "time": 174.5,
+      "lane": 1,
+      "direction": "right"
+    },
+    {
+      "time": 175.2,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 176.38,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 178.02,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 180.1,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 184.34,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 184.8,
+      "lane": 1,
+      "direction": "right"
+    },
+    {
+      "time": 186.7,
+      "lane": 1,
+      "direction": "right"
+    },
+    {
+      "time": 188.58,
+      "lane": 2,
+      "direction": "left"
+    },
+    {
+      "time": 189.02,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 190.44,
+      "lane": 0,
+      "direction": "up"
+    },
+    {
+      "time": 191.14,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 193.02,
+      "lane": 2,
+      "direction": "left"
+    },
+    {
+      "time": 196.52,
+      "lane": 1,
+      "direction": "up"
+    },
+    {
+      "time": 203.1,
+      "lane": 0,
+      "direction": "up"
+    },
+    {
+      "time": 204.06,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 204.52,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 208.72,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 210.12,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 211.52,
+      "lane": 1,
+      "direction": "up"
+    },
+    {
+      "time": 211.98,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 212.92,
+      "lane": 0,
+      "direction": "up"
+    },
+    {
+      "time": 213.62,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 213.88,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 214.8,
+      "lane": 1,
+      "direction": "up"
+    },
+    {
+      "time": 215.28,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 215.74,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 216.22,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 216.68,
+      "lane": 2,
+      "direction": "down"
+    },
+    {
+      "time": 217.2,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 217.62,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 218.56,
+      "lane": 2,
+      "direction": "left"
+    },
+    {
+      "time": 219.02,
+      "lane": 0,
+      "direction": "left"
+    },
+    {
+      "time": 219.48,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 219.72,
+      "lane": 1,
+      "direction": "left"
+    },
+    {
+      "time": 219.96,
+      "lane": 1,
+      "direction": "down"
+    },
+    {
+      "time": 220.42,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 221.08,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 221.36,
+      "lane": 2,
+      "direction": "up"
+    },
+    {
+      "time": 222.3,
+      "lane": 0,
+      "direction": "right"
+    },
+    {
+      "time": 223.22,
+      "lane": 2,
+      "direction": "right"
+    },
+    {
+      "time": 224.28,
+      "lane": 2,
+      "direction": "up"
+    }
+  ]
+}

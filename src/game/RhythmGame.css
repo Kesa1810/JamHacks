@@ -1,0 +1,205 @@
+/* ── Root ── */
+.rg-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+  background: #0a0a12;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: system-ui, sans-serif;
+}
+
+/* ── HUD ── */
+.rg-hud {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  padding: 12px 24px;
+  background: rgba(0, 0, 0, 0.6);
+  border-bottom: 1px solid #1a1a2e;
+  z-index: 10;
+}
+.rg-hud-score,
+.rg-hud-combo,
+.rg-hud-mult {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.rg-hud-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #555;
+}
+.rg-hud-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #eee;
+}
+.rg-combo { color: #00e5ff; }
+.rg-mult-1 { color: #eee; }
+.rg-mult-2 { color: #ffeb3b; }
+.rg-mult-4 { color: #ff4081; }
+
+/* ── Feedback flash ── */
+.rg-feedback {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  pointer-events: none;
+  z-index: 20;
+  animation: rg-pop 0.6s ease forwards;
+}
+.rg-feedback--hit  { color: #69f0ae; text-shadow: 0 0 20px #69f0ae; }
+.rg-feedback--miss { color: #ff5252; text-shadow: 0 0 20px #ff5252; }
+
+@keyframes rg-pop {
+  0%   { opacity: 1; transform: translateX(-50%) scale(1.2); }
+  70%  { opacity: 1; transform: translateX(-50%) scale(1); }
+  100% { opacity: 0; transform: translateX(-50%) scale(0.9); }
+}
+
+/* ── Overlay (idle / done) ── */
+.rg-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: rgba(0, 0, 0, 0.82);
+  z-index: 30;
+}
+.rg-title {
+  font-size: 42px;
+  font-weight: 900;
+  color: #00e5ff;
+  text-shadow: 0 0 30px #00e5ff88;
+  margin: 0;
+}
+.rg-sub {
+  color: #888;
+  font-size: 14px;
+  text-align: center;
+  max-width: 340px;
+}
+.rg-keys {
+  color: #555;
+  font-size: 13px;
+}
+.rg-start-btn {
+  margin-top: 8px;
+  padding: 14px 40px;
+  background: #00e5ff;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.rg-start-btn:hover { transform: scale(1.04); box-shadow: 0 0 20px #00e5ff88; }
+.rg-start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Results */
+.rg-results {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #0d0d1a;
+  border: 1px solid #1a1a2e;
+  border-radius: 10px;
+  padding: 20px 32px;
+  min-width: 260px;
+}
+.rg-results div {
+  display: flex;
+  justify-content: space-between;
+  gap: 32px;
+  font-size: 15px;
+  color: #aaa;
+}
+.rg-results strong { color: #eee; }
+
+/* ── Lane arena ── */
+.rg-arena {
+  flex: 1;
+  display: flex;
+  gap: 6px;
+  padding: 0 16px 16px;
+}
+
+.rg-lane {
+  flex: 1;
+  position: relative;
+  background: linear-gradient(to bottom, #08080f, #0d0d1e);
+  border: 1px solid #1a1a2e;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* Hit line — where the note should be when you swing */
+.rg-hit-line {
+  position: absolute;
+  bottom: 15%;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #00e5ff44;
+  box-shadow: 0 0 8px #00e5ff88;
+}
+
+/* ── Notes ── */
+.rg-note {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70px;
+  height: 70px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 900;
+  border: 3px solid transparent;
+  transition: top 0.016s linear;
+  z-index: 5;
+}
+
+/* Direction colour coding */
+.rg-note--left  { background: #1a0030; border-color: #ce93d8; color: #ce93d8; box-shadow: 0 0 12px #ce93d888; }
+.rg-note--right { background: #001a30; border-color: #80d8ff; color: #80d8ff; box-shadow: 0 0 12px #80d8ff88; }
+.rg-note--up    { background: #0a2000; border-color: #b9f6ca; color: #b9f6ca; box-shadow: 0 0 12px #b9f6ca88; }
+.rg-note--down  { background: #2a1000; border-color: #ffcc80; color: #ffcc80; box-shadow: 0 0 12px #ffcc8088; }
+
+.rg-note-arrow { pointer-events: none; }
+
+/* Hit explosion */
+.rg-note--explode {
+  animation: rg-explode 0.35s ease forwards;
+}
+@keyframes rg-explode {
+  0%   { transform: translateX(-50%) scale(1);   opacity: 1; }
+  40%  { transform: translateX(-50%) scale(1.6); opacity: 0.8; }
+  100% { transform: translateX(-50%) scale(2.2); opacity: 0; }
+}
+
+/* Missed note */
+.rg-note--missed {
+  animation: rg-miss 0.3s ease forwards;
+}
+@keyframes rg-miss {
+  0%   { opacity: 1; filter: none; }
+  100% { opacity: 0; filter: grayscale(1) brightness(0.3); }
+}

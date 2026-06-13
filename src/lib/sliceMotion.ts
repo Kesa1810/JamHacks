@@ -65,8 +65,8 @@ export function enrichWithSlice(
     prevTime: now,
     velX,
     velY,
-    momentumX,
-    momentumY,
+    momentumX: state.momentumX,
+    momentumY: state.momentumY,
   }
 
   return {
