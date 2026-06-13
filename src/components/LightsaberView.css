@@ -1,0 +1,363 @@
+.lightsaber-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+.lightsaber-scene.beat-mode {
+  min-height: 100vh;
+  height: 100vh;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(0, 229, 255, 0.08), transparent 45%),
+    radial-gradient(circle at 50% 80%, rgba(255, 0, 128, 0.06), transparent 40%),
+    linear-gradient(180deg, #060812 0%, #0a1020 55%, #120818 100%);
+}
+
+.grid-floor {
+  position: absolute;
+  inset: 45% -30% -30%;
+  background:
+    linear-gradient(rgba(0, 229, 255, 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.14) 1px, transparent 1px);
+  background-size: 56px 56px;
+  transform: perspective(600px) rotateX(74deg);
+  transform-origin: top center;
+  opacity: 0.55;
+}
+
+.position-track.vertical {
+  left: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.position-track.horizontal {
+  left: 50%;
+  bottom: 2rem;
+  transform: translateX(-50%);
+  width: 280px;
+  height: auto;
+  flex-direction: row;
+  align-items: center;
+}
+
+.position-track {
+  position: absolute;
+}
+
+.horizontal-line {
+  flex: 1;
+  height: 4px;
+  width: auto;
+  background: linear-gradient(90deg, #00e5ff, #ff0080);
+}
+
+.horizontal-marker {
+  top: 50%;
+  left: 50%;
+  margin: -9px 0 0 -9px;
+}
+
+.track-label.left,
+.track-label.right {
+  writing-mode: horizontal-tb;
+}
+
+.track-label.left {
+  margin-right: 0.25rem;
+}
+
+.track-label.right {
+  margin-left: 0.25rem;
+}
+
+.track-line {
+  flex: 1;
+  width: 4px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #00e5ff, #ff0080);
+  opacity: 0.35;
+}
+
+.position-marker {
+  position: absolute;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin-left: -9px;
+  border-radius: 50%;
+  background: #00e5ff;
+  box-shadow: 0 0 20px #00e5ff;
+}
+
+.track-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  color: #8aa0b8;
+}
+
+.saber-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  perspective: 900px;
+}
+
+.idle-message {
+  position: absolute;
+  text-align: center;
+  color: #8aa0b8;
+}
+
+.idle-message .small {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.coming-soon {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(138, 160, 184, 0.6);
+}
+
+.lane {
+  position: absolute;
+  top: 10%;
+  bottom: 35%;
+  width: 22%;
+  border: 1px dashed rgba(255, 0, 128, 0.15);
+  border-radius: 0.5rem;
+  pointer-events: none;
+}
+
+.lane-left {
+  left: 12%;
+}
+
+.lane-center {
+  left: 39%;
+}
+
+.lane-right {
+  right: 12%;
+}
+
+.saber-rig {
+  position: relative;
+  width: 60px;
+  height: 320px;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.lightsaber-scene.beat-mode {
+  min-height: 100%;
+}
+
+.lightsaber-scene.beat-mode .saber-rig {
+  width: 72px;
+  height: 380px;
+}
+
+.lightsaber-scene.beat-mode .saber-blade {
+  height: 280px;
+}
+
+.beat-hud {
+  position: absolute;
+  top: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.beat-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.beat-subtitle {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: #8aa0b8;
+}
+
+.beat-spawn-line {
+  position: absolute;
+  top: 18%;
+  left: 8%;
+  right: 8%;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, #ff0080, #00e5ff, #ff0080, transparent);
+  opacity: 0.55;
+  box-shadow: 0 0 16px rgba(255, 0, 128, 0.35);
+}
+
+.lightsaber-scene.beat-mode .lane {
+  top: 12%;
+  bottom: 5%;
+  width: 26%;
+  border-style: solid;
+  border-color: rgba(255, 0, 128, 0.28);
+  background: rgba(255, 0, 128, 0.04);
+}
+
+.lightsaber-scene.beat-mode .lane-left {
+  left: 6%;
+}
+
+.lightsaber-scene.beat-mode .lane-center {
+  left: 37%;
+}
+
+.lightsaber-scene.beat-mode .lane-right {
+  right: 6%;
+}
+
+.lightsaber-scene.beat-mode .beat-spawn-line {
+  top: 12%;
+  left: 4%;
+  right: 4%;
+}
+
+.lane-label {
+  position: absolute;
+  top: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: rgba(255, 0, 128, 0.5);
+}
+
+.slice-indicator {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #fff;
+  background: rgba(0, 229, 255, 0.15);
+  border: 2px solid rgba(0, 229, 255, 0.5);
+  box-shadow: 0 0 24px rgba(0, 229, 255, 0.35);
+  pointer-events: none;
+  animation: slice-pop 120ms ease-out;
+}
+
+.slice-trail {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 200px;
+  margin: -100px 0 0 -7px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(0, 229, 255, 0.7), transparent);
+  filter: blur(3px);
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes slice-pop {
+  from {
+    transform: translate(-50%, -50%) scale(0.7);
+    opacity: 0.4;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+.saber-handle {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 28px;
+  height: 90px;
+  margin-left: -14px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #555, #222);
+  box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.15);
+}
+
+.saber-guard {
+  position: absolute;
+  bottom: 86px;
+  left: 50%;
+  width: 44px;
+  height: 10px;
+  margin-left: -22px;
+  border-radius: 4px;
+  background: #888;
+}
+
+.saber-blade {
+  position: absolute;
+  bottom: 94px;
+  left: 50%;
+  width: 16px;
+  height: 220px;
+  margin-left: -8px;
+  transform-origin: bottom center;
+}
+
+.blade-core {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px 999px 4px 4px;
+  background: linear-gradient(180deg, #fff 0%, #00e5ff 30%, #0088ff 100%);
+}
+
+.blade-glow {
+  position: absolute;
+  inset: -8px -16px;
+  background: radial-gradient(circle, rgba(0, 229, 255, 0.45), transparent 70%);
+  filter: blur(8px);
+  z-index: -1;
+}
+
+.motion-trail {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.trail-segment {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 180px;
+  margin: -90px 0 0 -6px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(0, 229, 255, 0.6), transparent);
+  filter: blur(2px);
+}

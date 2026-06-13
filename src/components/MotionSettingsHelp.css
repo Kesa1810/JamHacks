@@ -1,0 +1,34 @@
+.motion-settings-help {
+  margin: 1rem 1.25rem 0;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: rgba(0, 229, 255, 0.06);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  text-align: left;
+}
+
+.help-title {
+  margin: 0 0 0.75rem;
+  font-weight: 700;
+  color: #00e5ff;
+  font-size: 0.95rem;
+}
+
+.help-warning {
+  margin: 0 0 0.75rem;
+  color: #ffb347;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.help-steps {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: #c8d6e5;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.help-steps li + li {
+  margin-top: 0.4rem;
+}

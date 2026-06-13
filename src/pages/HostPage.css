@@ -1,0 +1,257 @@
+.host-page--playing {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.playing-hud {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.playing-hud .eyebrow {
+  margin: 0;
+}
+
+.host-layout--playing {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+}
+
+.host-layout--playing .arena {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  border-radius: 0;
+  border: none;
+}
+
+.host-page {
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.host-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #00e5ff;
+}
+
+.host-header h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  background: linear-gradient(90deg, #fff, #00e5ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.subtitle {
+  margin: 0.5rem 0 0;
+  color: #8aa0b8;
+  max-width: 36rem;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #8aa0b8;
+  white-space: nowrap;
+}
+
+.status-pill.online {
+  color: #7dffb3;
+  border-color: rgba(125, 255, 179, 0.25);
+  background: rgba(125, 255, 179, 0.08);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 10px currentColor;
+}
+
+.host-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) 1fr;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.qr-panel {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+}
+
+.qr-card {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 1rem;
+  margin-bottom: 1rem;
+}
+
+.qr-placeholder {
+  width: 220px;
+  height: 220px;
+  display: grid;
+  place-items: center;
+  color: #333;
+}
+
+.session-label {
+  margin: 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #8aa0b8;
+}
+
+.session-id {
+  margin: 0.25rem 0 0.75rem;
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+.controller-link {
+  flex: 1;
+  font-size: 0.78rem;
+  word-break: break-all;
+  color: #00e5ff;
+}
+
+.url-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.copy-btn {
+  flex-shrink: 0;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  border-radius: 0.5rem;
+  background: rgba(0, 229, 255, 0.1);
+  color: #00e5ff;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.ip-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+  color: #8aa0b8;
+}
+
+.ip-picker select {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.35);
+  color: #e8f4ff;
+  font: inherit;
+}
+
+.phone-hint {
+  margin: 0 0 0.75rem;
+  color: #8aa0b8;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.network-note {
+  margin: 0 0 0.75rem;
+  font-size: 0.8rem;
+  color: #7dffb3;
+}
+
+.tunnel-active {
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.5rem;
+  background: rgba(125, 255, 179, 0.08);
+  border: 1px solid rgba(125, 255, 179, 0.2);
+}
+
+.network-note.warn {
+  color: #ffb347;
+  background: rgba(255, 179, 71, 0.08);
+  border: 1px solid rgba(255, 179, 71, 0.2);
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.5rem;
+}
+
+.local-url-note {
+  font-size: 0.78rem;
+  color: #8aa0b8;
+  word-break: break-all;
+  margin: 0 0 0.75rem;
+}
+
+.tips {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: #8aa0b8;
+  font-size: 0.9rem;
+}
+
+.tips li + li {
+  margin-top: 0.35rem;
+}
+
+.arena {
+  position: relative;
+  min-height: 520px;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  border: 1px solid rgba(0, 229, 255, 0.15);
+  background: linear-gradient(180deg, rgba(0, 229, 255, 0.04), rgba(255, 0, 128, 0.03));
+}
+
+@media (max-width: 900px) {
+  .host-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .host-header {
+    flex-direction: column;
+  }
+}
