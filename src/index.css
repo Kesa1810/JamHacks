@@ -2,8 +2,11 @@
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #e8f4ff;
-  background: #05060f;
+
+  /* Forest theme colors */
+  color: #eaf5ee;
+  background: #0f1f17;
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -13,20 +16,22 @@
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  background:
-    radial-gradient(circle at 20% 20%, rgba(0, 229, 255, 0.08), transparent 35%),
-    radial-gradient(circle at 80% 0%, rgba(255, 0, 128, 0.08), transparent 30%),
-    #05060f;
-}
-
+html,
+body,
 #root {
-  min-height: 100vh;
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
+/* Main forest background */
+body {
+  min-height: 100vh;
+  background: #0f1f17;
+  color: #eaf5ee;
+}
+
+/* Keep this only for fullscreen game mode (safe, not visual) */
 html.sabersync-playing,
 html.sabersync-playing body,
 html.sabersync-playing #root {
@@ -37,11 +42,33 @@ html.sabersync-playing #root {
   padding: 0;
 }
 
+/* Buttons = forest UI style */
 button {
   font: inherit;
   cursor: pointer;
+
+  background: #1c3528;
+  color: #eaf5ee;
+
+  border: 1px solid #2e4a3a;
+  border-radius: 12px;
+
+  padding: 10px 16px;
+
+  transition: transform 0.15s ease, background 0.15s ease;
 }
 
+button:hover {
+  transform: scale(1.03);
+  background: #244233;
+}
+
+/* Links */
 a {
-  color: #00e5ff;
+  color: #a7d7b5;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }

@@ -5,6 +5,8 @@ import {
   requestMotionAccess,
 } from '../lib/deviceMotion'
 
+export type SliceDirection = 'left' | 'right' | 'up' | 'down' | 'none'
+
 export type MotionData = {
   alpha: number | null
   beta: number | null
@@ -16,6 +18,10 @@ export type MotionData = {
   posY: number
   swingSpeed: number
   timestamp: number
+  velX: number
+  velY: number
+  sliceDirection: SliceDirection
+  slicePower: number
 }
 
 export type NetworkInfo = {
@@ -40,6 +46,10 @@ export function emptyMotion(): MotionData {
     posY: 0,
     swingSpeed: 0,
     timestamp: Date.now(),
+    velX: 0,
+    velY: 0,
+    sliceDirection: 'none',
+    slicePower: 0,
   }
 }
 
@@ -67,5 +77,9 @@ export function withPosition(
     posX: Math.max(-180, Math.min(180, tiltX + swingX)),
     posY: Math.max(-180, Math.min(180, tiltY + swingY)),
     swingSpeed: Math.sqrt(ax * ax + ay * ay + az * az),
+    velX: data.velX ?? 0,
+    velY: data.velY ?? 0,
+    sliceDirection: data.sliceDirection ?? 'none',
+    slicePower: data.slicePower ?? 0,
   }
 }

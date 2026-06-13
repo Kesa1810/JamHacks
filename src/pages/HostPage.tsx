@@ -7,7 +7,11 @@ import { LightsaberView } from '../components/LightsaberView'
 import { RhythmGame } from '../game/RhythmGame'
 import './HostPage.css'
 
-export function HostPage() {
+interface HostPageProps {
+  onExit?: () => void
+}
+
+export function HostPage({ onExit }: HostPageProps) {
   const [sessionId] = useState(createSessionId)
   const [network, setNetwork] = useState<NetworkInfo | null>(null)
   const [selectedIp, setSelectedIp] = useState('')
@@ -125,6 +129,11 @@ export function HostPage() {
       {!controllerConnected && (
         <header className="host-header">
           <div>
+            {onExit && (
+              <button type="button" className="back-btn" onClick={onExit}>
+                ← Menu
+              </button>
+            )}
             <p className="eyebrow">JamHacks · SaberSync</p>
             <h1>Phone Lightsaber</h1>
             <p className="subtitle">

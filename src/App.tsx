@@ -1,14 +1,14 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { useState } from 'react'
+import Menu from './Menu'
 import { HostPage } from './pages/HostPage'
-import { ControllerPage } from './pages/ControllerPage'
 
-export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HostPage />} />
-        <Route path="/controller/:sessionId" element={<ControllerPage />} />
-      </Routes>
-    </BrowserRouter>
-  )
+type Page = 'menu' | 'game'
+
+function App() {
+  const [page, setPage] = useState<Page>('menu')
+
+  if (page === 'game') return <HostPage onExit={() => setPage('menu')} />
+  return <Menu onPlay={() => setPage('game')} />
 }
+
+export default App

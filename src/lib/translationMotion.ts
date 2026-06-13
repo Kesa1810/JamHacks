@@ -102,7 +102,7 @@ function clamp(value: number, min: number, max: number) {
 }
 
 export function calibrateTranslation(
-  state: TranslationState,
+  _state: TranslationState,
   alpha: number,
   beta: number,
   gamma: number,

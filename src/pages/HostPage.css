@@ -1,3 +1,19 @@
+.back-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+  transition: color 0.15s, border-color 0.15s;
+}
+.back-btn:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
 .host-page--playing {
   position: fixed;
   inset: 0;

@@ -139,9 +139,17 @@ async function startReliableTunnel(port) {
       return tunnel
     } catch (err) {
       closeTunnel(tunnel)
-      console.log(`  ${label} failed (${err.message})`)
+      const message = err instanceof Error ? err.message : String(err)
+      console.log(`  ${label} failed (${message})`)
     }
     return null
+  }
+
+  const preferLocaltunnel = process.platform === 'win32'
+
+  if (preferLocaltunnel) {
+    const backup = await tryStart('Localtunnel backup', () => startLocaltunnel(port))
+    if (backup) return backup
   }
 
   const first = await tryStart('Cloudflare tunnel', () => startCloudflaredTunnel(port))
@@ -150,8 +158,13 @@ async function startReliableTunnel(port) {
   const retry = await tryStart('Cloudflare tunnel retry', () => startCloudflaredTunnel(port))
   if (retry) return retry
 
-  const backup = await tryStart('Localtunnel backup', () => startLocaltunnel(port))
-  if (backup) return backup
+  if (!preferLocaltunnel) {
+    const backup = await tryStart('Localtunnel backup', () => startLocaltunnel(port))
+    if (backup) return backup
+  } else {
+    const backup = await tryStart('Localtunnel retry', () => startLocaltunnel(port))
+    if (backup) return backup
+  }
 
   throw new Error('Tunnel unavailable')
 }
