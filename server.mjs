@@ -409,7 +409,7 @@ async function start() {
   })
 
 httpServer.listen(PORT, '0.0.0.0', () => {
-    console.log(`\n  SaberSync running:`)
+    console.log(`\n  Rhythm Crossing running:`)
     console.log(`  Local:   http://localhost:${PORT}`)
     console.log('  Tunnel:  starting public https link...')
 

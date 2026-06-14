@@ -32,8 +32,8 @@ export function MotionPermissionModal({
         <p className="modal-eyebrow">Permission required</p>
         <h2 id="motion-modal-title">Allow Motion &amp; Orientation</h2>
         <p className="modal-body">
-          SaberSync uses your phone&apos;s <strong>gyroscope</strong> and{' '}
-          <strong>accelerometer</strong> so you can swing a lightsaber on your computer.
+          Rhythm Crossing uses your phone&apos;s <strong>gyroscope</strong> and{' '}
+          <strong>accelerometer</strong> so you can slice blocks on your computer.
         </p>
 
         {!support.isSecureContext && (

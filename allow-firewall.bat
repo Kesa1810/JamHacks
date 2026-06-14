@@ -7,8 +7,8 @@ if %errorlevel% neq 0 (
   exit /b
 )
 
-netsh advfirewall firewall delete rule name="SaberSync Dev Server" >nul 2>&1
-netsh advfirewall firewall add rule name="SaberSync Dev Server" dir=in action=allow protocol=TCP localport=5173
+netsh advfirewall firewall delete rule name="Rhythm Crossing Dev Server" >nul 2>&1
+netsh advfirewall firewall add rule name="Rhythm Crossing Dev Server" dir=in action=allow protocol=TCP localport=5173
 
 echo.
 echo Firewall rule added for port 5173.

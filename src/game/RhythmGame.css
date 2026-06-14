@@ -1,7 +1,7 @@
-/* Animal Crossing — Forest Beats game theme
-   Overlays: warm cream, dark warm text, AC palette
+/* Rhythm Crossing — game arena theme
+   Overlays: warm cream, dark warm text, cozy palette
    Arena: warm dark forest, golden blocks, leaf-green saber
-   Fonts: Fredoka One (display) · Baloo 2 (body)
+   Fonts: Playfair Display (titles) · Baloo 2 (body)
    Rules: no gradients, no containers */
 
 /* -- Root -- */
@@ -47,7 +47,7 @@
 }
 
 .rg-stat-val {
-  font-family: 'Fredoka One', cursive;
+  font-family: 'Baloo 2', sans-serif;
   font-size: 24px;
   color: #4a3728;
   line-height: 1.1;
@@ -64,7 +64,7 @@
   top: 22%;
   left: 50%;
   transform: translateX(-50%);
-  font-family: 'Fredoka One', cursive;
+  font-family: 'Baloo 2', sans-serif;
   font-size: 40px;
   pointer-events: none;
   z-index: 25;
@@ -118,7 +118,8 @@
 }
 
 .rg-title {
-  font-family: 'Fredoka One', cursive;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
   font-size: 52px;
   color: #3a7832;
   margin: 0;
@@ -148,7 +149,7 @@
   color: #fff;
   border: none;
   border-radius: 999px;
-  font-family: 'Fredoka One', cursive;
+  font-family: 'Baloo 2', sans-serif;
   font-size: 20px;
   letter-spacing: .04em;
   cursor: pointer;
@@ -192,7 +193,7 @@
 }
 
 .rg-results strong {
-  font-family: 'Fredoka One', cursive;
+  font-family: 'Baloo 2', sans-serif;
   font-size: 18px;
   color: #4a3728;
 }
@@ -209,7 +210,7 @@
 }
 
 .rg-cal-arrow {
-  font-family: 'Fredoka One', cursive;
+  font-family: 'Baloo 2', sans-serif;
   font-size: 88px;
   line-height: 1;
   color: #f5c842;
@@ -261,7 +262,7 @@
 
 .rg-pause-title {
   margin: 0 0 8px;
-  font-family: 'Fredoka One', cursive;
+  font-family: 'Baloo 2', sans-serif;
   font-size: 36px;
   letter-spacing: .04em;
   color: #3a7832;
@@ -340,7 +341,7 @@
 }
 
 .rg-slider-val {
-  font-family: 'Fredoka One', cursive;
+  font-family: 'Baloo 2', sans-serif;
   font-size: 15px;
   color: #f5c842;
 }

@@ -128,7 +128,7 @@ export function HostPage({ onExit }: HostPageProps) {
         <div className="playing-hud">
           <div className="status-pill online">
             <span className="status-dot" />
-            phone connected *
+            phone connected
           </div>
           <button
             type="button"
@@ -151,7 +151,7 @@ export function HostPage({ onExit }: HostPageProps) {
             </button>
           )}
 
-          <h1 className="connect-title">scan to play *</h1>
+          <h1 className="connect-title">scan to play</h1>
           <p className="connect-sub">open on your phone to use it as the controller</p>
 
           <div className="qr-card">

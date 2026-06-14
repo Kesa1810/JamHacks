@@ -1,21 +1,43 @@
+import { useState } from 'react'
 import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom'
 import { HostPage } from './pages/HostPage'
 import { ControllerPage } from './pages/ControllerPage'
-import Menu from './Menu'
+import { StatsPage } from './pages/StatsPage'
+import { SettingsPage } from './pages/SettingsPage'
+import { ChooseBlocksPage } from './pages/ChooseBlocksPage'
+import { ChooseMapPage } from './pages/ChooseMapPage'
+import Menu from './pages/Menu'
 
-function MenuPage() {
+function AppRoutes() {
+  const [selectedMap, setSelectedMap] = useState('beauty-and-a-beat')
   const navigate = useNavigate()
-  return <Menu onPlay={(map) => navigate('/game', { state: { map } })} />
+
+  return (
+    <Routes>
+      <Route path="/" element={
+        <Menu
+          selectedMap={selectedMap}
+          onPlay={() => navigate('/game', { state: { map: selectedMap } })}
+          onStats={() => navigate('/stats')}
+          onSettings={() => navigate('/settings')}
+          onChooseBlocks={() => navigate('/choose-blocks')}
+          onChooseMap={() => navigate('/choose-map')}
+        />
+      } />
+      <Route path="/game"           element={<HostPage />} />
+      <Route path="/controller/:sessionId" element={<ControllerPage />} />
+      <Route path="/stats"          element={<StatsPage />} />
+      <Route path="/settings"       element={<SettingsPage />} />
+      <Route path="/choose-blocks"  element={<ChooseBlocksPage />} />
+      <Route path="/choose-map"     element={<ChooseMapPage currentMap={selectedMap} onSelect={setSelectedMap} />} />
+    </Routes>
+  )
 }
 
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<MenuPage />} />
-        <Route path="/game" element={<HostPage />} />
-        <Route path="/controller/:sessionId" element={<ControllerPage />} />
-      </Routes>
+      <AppRoutes />
     </BrowserRouter>
   )
 }

@@ -12,18 +12,21 @@ import {
   SWING_THRESHOLD,
   type LaneCalibration,
 } from '../lib/sliceMotion'
-import { GlbCube } from './GlbBlocksLayer'
+import { saveRun } from '../lib/stats'
+import { loadSettings } from '../lib/settings'
+import type { GameSettings } from '../lib/settings'
+import { GlbCube, FlatBlock } from './GlbBlocksLayer'
 import './RhythmGame.css'
 
 // --- Song catalogue -----------------------------------------------------------
 const SONGS: Record<string, { beatmapUrl: string; audioUrl: string }> = {
   'beauty-and-a-beat': {
-    beatmapUrl: '/beatmap.json',
-    audioUrl:   '/song.mp3',
+    beatmapUrl: '/songs/beauty-and-a-beat.json',
+    audioUrl:   '/songs/beauty-and-a-beat.mp3',
   },
   'animals': {
-    beatmapUrl: '/beatmap (4).json',
-    audioUrl:   '/Martin Garrix - Animals (Official Video) - Martin Garrix (128k).mp3',
+    beatmapUrl: '/songs/animals.json',
+    audioUrl:   '/songs/animals.mp3',
   },
 }
 const DEFAULT_MAP = 'beauty-and-a-beat'
@@ -242,10 +245,15 @@ export function RhythmGame({ socketRef, connected, mapKey = DEFAULT_MAP }: Props
   const pausedRef     = useRef(false)
   const pausePanelRef = useRef<'menu' | 'settings'>('menu')
 
+  const [blockStyle, setBlockStyle] = useState<GameSettings['chosenBlock']>(() => loadSettings().chosenBlock)
+  const [blockMode,  setBlockMode]  = useState<GameSettings['blockMode']>(() => loadSettings().blockMode)
+
   const audioRef          = useRef<HTMLAudioElement | null>(null)
   const nextNoteIndexRef  = useRef(0)
   const rafRef            = useRef<number>(0)
+  const gameStartRef      = useRef<number>(0)
   const swingDetectorRef  = useRef(createSimpleSwingDetector())
+  const swingSensRef      = useRef(loadSettings().swingSensitivity)
   const gammaSmootherRef  = useRef(createGammaSmoother())
   const comboRef          = useRef(0)
   const multRef           = useRef(1)
@@ -357,7 +365,7 @@ export function RhythmGame({ socketRef, connected, mapKey = DEFAULT_MAP }: Props
     const onMotion = (data: MotionData) => {
       latestMotionRef.current = data
       if (phaseRef.current !== 'playing' || pausedRef.current) return
-      const { swing } = detectSwing(data, swingDetectorRef.current, SWING_THRESHOLD)
+      const { swing } = detectSwing(data, swingDetectorRef.current, SWING_THRESHOLD / swingSensRef.current)
       if (swing) processSwing()
     }
 
@@ -403,6 +411,9 @@ export function RhythmGame({ socketRef, connected, mapKey = DEFAULT_MAP }: Props
     const acc = hits + misses > 0 ? Math.round((hits / (hits + misses)) * 100) : 0
     try {
       localStorage.setItem('lastRunStats', JSON.stringify({ score, combo, hits, misses, accuracy: acc }))
+      if (hits + misses > 0) {
+        saveRun({ score, accuracy: acc, hits, misses, durationMs: Date.now() - gameStartRef.current, timestamp: Date.now() })
+      }
     } catch {}
     cancelAnimationFrame(rafRef.current)
     audioRef.current?.pause()
@@ -604,6 +615,11 @@ export function RhythmGame({ socketRef, connected, mapKey = DEFAULT_MAP }: Props
     setHits(0); setMisses(0); setMultiplier(1)
     setPaused(false)
     audioTimeRef.current = 0
+    gameStartRef.current = Date.now()
+    const s = loadSettings()
+    swingSensRef.current = s.swingSensitivity
+    setBlockStyle(s.chosenBlock)
+    setBlockMode(s.blockMode)
     setPhase('playing')
     await audio.play()
   }, [beatmap])
@@ -722,7 +738,7 @@ export function RhythmGame({ socketRef, connected, mapKey = DEFAULT_MAP }: Props
       {phase === 'idle' && (
         <div className="rg-overlay">
           <div className="rg-grid-floor" />
-          <h2 className="rg-title">Forest Beats</h2>
+          <h2 className="rg-title">Rhythm Crossing</h2>
           <p className="rg-sub">
             {beatmap ? `${beatmap.notes.length} notes - ${beatmap.song}` : 'loading beatmap...'}
           </p>
@@ -778,7 +794,10 @@ export function RhythmGame({ socketRef, connected, mapKey = DEFAULT_MAP }: Props
               className={`rg-block ${note.exploding ? 'rg-block--explode' : ''} ${note.missed ? 'rg-block--missed' : ''}`}
               style={getBlockStyle(note)}
             >
-              <GlbCube />
+              {blockMode === '3d'
+                ? <GlbCube blockStyle={blockStyle} />
+                : <FlatBlock blockStyle={blockStyle} />
+              }
             </div>
           ))}
 

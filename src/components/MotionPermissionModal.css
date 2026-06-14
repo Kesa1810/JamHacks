@@ -46,7 +46,8 @@
 
 .motion-modal h2 {
   margin: 0 0 0.8rem;
-  font-family: 'Fredoka One', cursive;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
   font-size: 1.8rem;
   color: #3a7832;
   letter-spacing: .02em;
@@ -112,7 +113,7 @@
   border-radius: 999px;
   background: #5db85c;
   color: #fff;
-  font-family: 'Fredoka One', cursive;
+  font-family: 'Baloo 2', sans-serif;
   font-size: 1.15rem;
   letter-spacing: .03em;
   touch-action: manipulation;

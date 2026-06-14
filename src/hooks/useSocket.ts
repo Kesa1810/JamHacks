@@ -22,9 +22,6 @@ export function useSocket(sessionId: string, role: Role) {
       reconnectionDelay: 500,
       reconnectionDelayMax: 4000,
       timeout: 8000,
-      // Ping every 10s so the tunnel doesn't kill the connection on idle
-      pingInterval: 10000,
-      pingTimeout: 5000,
     })
     socketRef.current = socket
 

@@ -131,7 +131,7 @@ export function ControllerPage() {
 
       <header className="controller-top">
         <div>
-          <p className="eyebrow">SaberSync - Motion Controller</p>
+          <p className="eyebrow">Rhythm Crossing — Motion Controller</p>
           <p className="session-code">{sessionId}</p>
         </div>
         <div className={`status-pill ${connected ? 'online' : ''}`}>
