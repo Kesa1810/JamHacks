@@ -1,14 +1,21 @@
-import { useState } from 'react'
-import Menu from './Menu'
+import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom'
 import { HostPage } from './pages/HostPage'
+import { ControllerPage } from './pages/ControllerPage'
+import Menu from './Menu'
 
-type Page = 'menu' | 'game'
-
-function App() {
-  const [page, setPage] = useState<Page>('menu')
-
-  if (page === 'game') return <HostPage onExit={() => setPage('menu')} />
-  return <Menu onPlay={() => setPage('game')} />
+function MenuPage() {
+  const navigate = useNavigate()
+  return <Menu onPlay={() => navigate('/game')} />
 }
 
-export default App
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<MenuPage />} />
+        <Route path="/game" element={<HostPage />} />
+        <Route path="/controller/:sessionId" element={<ControllerPage />} />
+      </Routes>
+    </BrowserRouter>
+  )
+}
