@@ -80,7 +80,7 @@ export function LightsaberView({ motion, connected, beatMode = false }: Props) {
             <div className="saber-handle" />
             <div className="saber-guard" />
             <div className="saber-blade">
-              <div className="blade-core" style={{ boxShadow: `0 0 ${glow}px #00e5ff` }} />
+              <div className="blade-core" style={{ boxShadow: `0 0 ${glow}px #c4aaff` }} />
               <div
                 className="blade-glow"
                 style={{ opacity: 0.5 + Math.min((motion?.swingSpeed ?? 0) / 20, 0.5) }}

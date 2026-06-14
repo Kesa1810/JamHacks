@@ -49,9 +49,9 @@ const Menu: React.FC<MenuProps> = ({ onPlay }) => {
 
       <main className="menu-card">
         <header className="title-section">
-          <p className="eyebrow">forest rhythm • bright pop energy</p>
-          <h1 className="game-title">FOREST BEATS</h1>
-          <p className="game-subtitle">fresh beats, glowing pines, and a wake-up rhythm that feels alive from the first note.</p>
+          <p className="eyebrow">rhythm game ✦ swing your phone</p>
+          <h1 className="game-title">forest beats</h1>
+          <p className="game-subtitle">slice blocks with your phone. don't miss.</p>
         </header>
 
         <nav className="button-group" aria-label="main menu">

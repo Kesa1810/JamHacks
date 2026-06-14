@@ -3,9 +3,8 @@
   line-height: 1.5;
   font-weight: 400;
 
-  /* Forest theme colors */
-  color: #eaf5ee;
-  background: #0f1f17;
+  color: #e8d5ff;
+  background: #110d1f;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -24,11 +23,10 @@ body,
   padding: 0;
 }
 
-/* Main forest background */
 body {
   min-height: 100vh;
-  background: #0f1f17;
-  color: #eaf5ee;
+  background: #110d1f;
+  color: #e8d5ff;
 }
 
 /* Keep this only for fullscreen game mode (safe, not visual) */
@@ -42,30 +40,24 @@ html.sabersync-playing #root {
   padding: 0;
 }
 
-/* Buttons = forest UI style */
 button {
   font: inherit;
   cursor: pointer;
-
-  background: #1c3528;
-  color: #eaf5ee;
-
-  border: 1px solid #2e4a3a;
-  border-radius: 12px;
-
-  padding: 10px 16px;
-
-  transition: transform 0.15s ease, background 0.15s ease;
+  background: #1c1433;
+  color: #e8d5ff;
+  border: 1.5px solid #3d2d6e;
+  border-radius: 999px;
+  padding: 10px 18px;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 button:hover {
-  transform: scale(1.03);
-  background: #244233;
+  background: #c4aaff;
+  color: #110d1f;
 }
 
-/* Links */
 a {
-  color: #a7d7b5;
+  color: #c4aaff;
   text-decoration: none;
 }
 

@@ -3,7 +3,6 @@ import { QRCodeSVG } from 'qrcode.react'
 import { useSocket } from '../hooks/useSocket'
 import { createSessionId } from '../lib/session'
 import type { MotionData, NetworkInfo } from '../types/motion'
-import { LightsaberView } from '../components/LightsaberView'
 import { RhythmGame } from '../game/RhythmGame'
 import './HostPage.css'
 
@@ -126,56 +125,63 @@ export function HostPage({ onExit }: HostPageProps) {
 
   return (
     <div className={`host-page ${controllerConnected ? 'host-page--playing' : ''}`}>
-      {!controllerConnected && (
-        <header className="host-header">
-          <div>
-            {onExit && (
-              <button type="button" className="back-btn" onClick={onExit}>
-                ← Menu
-              </button>
-            )}
-            <p className="eyebrow">JamHacks · SaberSync</p>
-            <h1>Phone Lightsaber</h1>
-            <p className="subtitle">
-              Anyone can scan the QR code — any phone, any network. No Wi‑Fi setup needed.
-            </p>
-          </div>
-          <div className="status-pill">
-            <span className="status-dot" />
-            Waiting for phone…
-          </div>
-        </header>
-      )}
-
       {controllerConnected && (
         <div className="playing-hud">
-          <p className="eyebrow">SaberSync · Live</p>
           <div className="status-pill online">
             <span className="status-dot" />
-            Phone connected
+            phone connected ✦
           </div>
         </div>
       )}
 
-      <div className={`host-layout ${controllerConnected ? 'host-layout--playing' : ''}`}>
-        {!controllerConnected && (
-        <aside className="qr-panel">
+      {!controllerConnected && (
+        <div className="connect-screen">
+          {onExit && (
+            <button type="button" className="back-btn" onClick={onExit}>
+              ← back
+            </button>
+          )}
+
+          <h1 className="connect-title">scan to play ✦</h1>
+          <p className="connect-sub">open on your phone to use it as the controller</p>
+
           <div className="qr-card">
             {qrUrl ? (
-              <QRCodeSVG value={qrUrl} size={220} level="M" includeMargin />
+              <QRCodeSVG value={qrUrl} size={200} level="M" includeMargin />
             ) : (
               <div className="qr-placeholder">
-                {network ? 'Starting secure link…' : 'Loading…'}
+                {network ? 'getting link…' : 'loading…'}
               </div>
             )}
           </div>
 
-          <p className="session-label">Session</p>
+          <p className="session-label">session</p>
           <p className="session-id">{sessionId}</p>
+
+          {qrUrl ? (
+            <div className="url-row">
+              <code className="controller-link">{qrUrl}</code>
+              <button type="button" className="copy-btn" onClick={copyUrl}>
+                {copied ? 'copied!' : 'copy'}
+              </button>
+            </div>
+          ) : (
+            <p className="network-note warn">
+              {network?.tunnelPending
+                ? 'tunnel expired — fetching new link…'
+                : 'starting link… takes ~10 seconds'}
+            </p>
+          )}
+
+          {localUrl && !qrUrl && (
+            <p className="local-url-note">
+              same wifi only: <code>{localUrl}</code>
+            </p>
+          )}
 
           {usableAddresses.length > 1 && !qrUrl && (
             <label className="ip-picker">
-              <span>Network IP for phone</span>
+              <span>network ip</span>
               <select value={selectedIp} onChange={(e) => setSelectedIp(e.target.value)}>
                 {usableAddresses.map((a) => (
                   <option key={a.ip} value={a.ip}>
@@ -186,61 +192,19 @@ export function HostPage({ onExit }: HostPageProps) {
             </label>
           )}
 
-          {qrUrl ? (
-            <p className="network-note tunnel-active">
-              Public https link — share or scan from any phone. Motion permission is asked when
-              they open the link.
-            </p>
-          ) : (
-            <p className="network-note warn">
-              {network?.tunnelPending
-                ? 'Tunnel expired — getting a new link… QR will update automatically.'
-                : 'Starting public link… QR appears in about 10–20 seconds.'}
-            </p>
-          )}
-
-          {qrUrl && (
-            <>
-              <div className="url-row">
-                <code className="controller-link">{qrUrl}</code>
-                <button type="button" className="copy-btn" onClick={copyUrl}>
-                  {copied ? 'Copied!' : 'Copy'}
-                </button>
-              </div>
-              <p className="phone-hint">
-                Scan with your phone&apos;s Camera app, or paste this https link into Safari or
-                Chrome on your phone.
-              </p>
-            </>
-          )}
-
-          {localUrl && !qrUrl && (
-            <p className="local-url-note">
-              Same-Wi‑Fi fallback only: <code>{localUrl}</code>
-            </p>
-          )}
-
           <ul className="tips">
-            <li><strong>Don&apos;t refresh</strong> the computer page — it changes the session code</li>
-            <li>Phone opens controller page → tap <strong>Allow Motion &amp; Orientation</strong></li>
-            <li>Swing <strong>right</strong> → saber goes right. Swing <strong>up</strong> → saber goes up</li>
-            <li>Beat blocks in the lanes are coming next</li>
+            <li>don't refresh this page — it'll reset the session</li>
+            <li>on your phone, tap <strong>allow motion</strong> when it pops up</li>
+            <li>swing your phone to move the saber!</li>
           </ul>
-        </aside>
-        )}
+        </div>
+      )}
 
+      {controllerConnected && (
         <main className="arena">
-          {controllerConnected ? (
-            <RhythmGame motion={motion} />
-          ) : (
-            <LightsaberView
-              motion={motion}
-              connected={controllerConnected}
-              beatMode={false}
-            />
-          )}
+          <RhythmGame motion={motion} />
         </main>
-      </div>
+      )}
     </div>
   )
 }
