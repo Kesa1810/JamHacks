@@ -4,13 +4,16 @@ import { useSocket } from '../hooks/useSocket'
 import { createSessionId } from '../lib/session'
 import type { MotionData, NetworkInfo } from '../types/motion'
 import { RhythmGame } from '../game/RhythmGame'
+import type { GameSettings, RunStats } from '../App'
 import './HostPage.css'
 
 interface HostPageProps {
   onExit?: () => void
+  settings?: GameSettings
+  onGameEnd?: (s: RunStats) => void
 }
 
-export function HostPage({ onExit }: HostPageProps) {
+export function HostPage({ onExit, settings, onGameEnd }: HostPageProps) {
   const [sessionId] = useState(createSessionId)
   const [network, setNetwork] = useState<NetworkInfo | null>(null)
   const [selectedIp, setSelectedIp] = useState('')
@@ -202,7 +205,12 @@ export function HostPage({ onExit }: HostPageProps) {
 
       {controllerConnected && (
         <main className="arena">
-          <RhythmGame motion={motion} />
+          <RhythmGame
+            motion={motion}
+            settings={settings}
+            onGameEnd={onGameEnd}
+            onExit={onExit}
+          />
         </main>
       )}
     </div>

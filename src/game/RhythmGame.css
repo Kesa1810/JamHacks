@@ -91,6 +91,7 @@
 .rg-start-btn:hover   { transform: scale(1.05); background: #d8b4fe; }
 .rg-start-btn:disabled { opacity: .4; cursor: not-allowed; }
 
+<<<<<<< ours
 .rg-sens { color: #a78bfa; font-size: 18px; }
 
 .rg-crowd-note {
@@ -119,6 +120,29 @@
   transition: color .15s, border-color .15s;
 }
 .rg-reset-cal:hover { color: #c4aaff; border-color: #c4aaff; }
+=======
+.rg-done-btns {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.rg-home-btn {
+  margin-top: 6px;
+  padding: 14px 32px;
+  background: transparent;
+  color: #c4aaff;
+  border: 2px solid #c4aaff44;
+  border-radius: 8px;
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+  letter-spacing: .04em;
+}
+.rg-home-btn:hover { border-color: #c4aaff; color: #f0d6ff; }
+>>>>>>> theirs
 
 .rg-results {
   display: flex;

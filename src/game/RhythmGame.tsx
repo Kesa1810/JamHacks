@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { MotionData, SliceDirection } from '../types/motion'
 import { createSliceTracker, enrichWithSlice } from '../lib/sliceMotion'
+<<<<<<< ours
 import {
   loadProfile,
   saveProfile,
@@ -11,12 +12,14 @@ import {
   submitSessionToServer,
   type MotionProfile,
 } from '../lib/adaptiveProfile'
+=======
+import type { GameSettings, RunStats } from '../App'
+>>>>>>> theirs
 import './RhythmGame.css'
 
 // ─── Tunable constants ────────────────────────────────────────────────────────
-const LEAD_TIME       = 2.6   // seconds a block is visible before its hit time
-const HIT_WINDOW      = 0.35  // ± seconds that count as a hit
-const PERFECT_WINDOW  = 0.09  // tighter perfect window
+const LEAD_TIME       = 2.6   // default; overridden by settings prop
+const HIT_WINDOW      = 0.35  // default; overridden by settings prop
 const BASE_POINTS     = 100
 const SWING_ARM_POWER = 0.4   // slicePower above this fires a swing
 const SWING_RESET_POW = 0.1   // must drop below this to re-arm
@@ -117,9 +120,25 @@ function FreeSaber({ motion, lastSwingDir }: SaberProps) {
 // ─── Main game component ──────────────────────────────────────────────────────
 interface Props {
   motion: MotionData | null
+  settings?: GameSettings
+  onGameEnd?: (stats: RunStats) => void
+  onExit?: () => void
 }
 
-export function RhythmGame({ motion }: Props) {
+export function RhythmGame({ motion, settings, onGameEnd, onExit }: Props) {
+  const leadTimeRef  = useRef(settings?.leadTime  ?? LEAD_TIME)
+  const hitWindowRef = useRef(settings?.hitWindow ?? HIT_WINDOW)
+  leadTimeRef.current  = settings?.leadTime  ?? LEAD_TIME
+  hitWindowRef.current = settings?.hitWindow ?? HIT_WINDOW
+
+  const onGameEndRef = useRef(onGameEnd)
+  onGameEndRef.current = onGameEnd
+
+  const maxComboRef    = useRef(0)
+  const scoreRef       = useRef(0)
+  const hitsRef        = useRef(0)
+  const missesRef      = useRef(0)
+  const didReportRef   = useRef(false)
   const [phase, setPhase]           = useState<'idle' | 'playing' | 'done'>('idle')
   const [beatmap, setBeatmap]       = useState<Beatmap | null>(null)
   const [activeNotes, setActiveNotes] = useState<ActiveNote[]>([])
@@ -147,6 +166,10 @@ export function RhythmGame({ motion }: Props) {
   comboRef.current = combo
   multRef.current  = multiplier
   activeNotesRef.current = activeNotes
+  scoreRef.current   = score
+  hitsRef.current    = hits
+  missesRef.current  = misses
+  if (combo > maxComboRef.current) maxComboRef.current = combo
 
   useEffect(() => {
     fetch('/beatmap.json')
@@ -184,7 +207,7 @@ export function RhythmGame({ motion }: Props) {
       prev.forEach((n, i) => {
         if (n.hit || n.missed) return
         const dist = Math.abs(n.time - now)
-        if (dist <= HIT_WINDOW && n.direction === direction && dist < bestDist) {
+        if (dist <= hitWindowRef.current && n.direction === direction && dist < bestDist) {
           bestDist = dist
           bestIdx = i
         }
@@ -196,7 +219,7 @@ export function RhythmGame({ motion }: Props) {
         return prev
       }
 
-      const perfect = bestDist <= PERFECT_WINDOW
+      const perfect = bestDist <= hitWindowRef.current * 0.25
       const newCombo = comboRef.current + 1
       const newMult  = newCombo >= 8 ? 4 : newCombo >= 4 ? 2 : 1
       setCombo(newCombo); setMultiplier(newMult)
@@ -279,7 +302,7 @@ export function RhythmGame({ motion }: Props) {
       const notes = beatmap.notes
       while (
         nextNoteIndexRef.current < notes.length &&
-        notes[nextNoteIndexRef.current].time - LEAD_TIME <= now
+        notes[nextNoteIndexRef.current].time - leadTimeRef.current <= now
       ) {
         const note = notes[nextNoteIndexRef.current]
         setActiveNotes((prev) => [
@@ -293,7 +316,7 @@ export function RhythmGame({ motion }: Props) {
       setActiveNotes((prev) => {
         let anyMissed = false
         const updated = prev.map((n) => {
-          if (!n.hit && !n.missed && now > n.time + HIT_WINDOW) {
+          if (!n.hit && !n.missed && now > n.time + hitWindowRef.current) {
             anyMissed = true
             return { ...n, missed: true }
           }
@@ -329,20 +352,24 @@ export function RhythmGame({ motion }: Props) {
   const startGame = useCallback(async () => {
     if (!beatmap) return
     const audio = new Audio('/song.mp3')
+    audio.volume = settings?.volume ?? 0.8
     audioRef.current = audio
     nextNoteIndexRef.current = 0
+    maxComboRef.current = 0
+    didReportRef.current = false
     setActiveNotes([]); setScore(0); setCombo(0)
     setHits(0); setMisses(0); setMultiplier(1); setAudioTime(0)
     setPhase('playing')
     await audio.play()
-  }, [beatmap])
+  }, [beatmap, settings?.volume])
 
   // ── Block position: scale + translate for "coming at you" illusion ─────────
   // progress 0 = just spawned (far, tiny), 1 = at hit zone (close, full size)
   // hit zone is at bottom 20% of arena
   const getBlockStyle = (note: ActiveNote): React.CSSProperties => {
+    const lt = leadTimeRef.current
     const progress = Math.min(
-      (audioTime - (note.time - LEAD_TIME)) / LEAD_TIME,
+      (audioTime - (note.time - lt)) / lt,
       1,
     )
     // Scale from 0.15 (far) to 1.1 (close)
@@ -379,6 +406,21 @@ export function RhythmGame({ motion }: Props) {
   }
 
   const accuracy = hits + misses > 0 ? Math.round((hits / (hits + misses)) * 100) : 0
+
+  // Report stats when game ends
+  useEffect(() => {
+    if (phase !== 'done' || didReportRef.current) return
+    didReportRef.current = true
+    const acc = hitsRef.current + missesRef.current > 0
+      ? Math.round((hitsRef.current / (hitsRef.current + missesRef.current)) * 100) : 0
+    onGameEndRef.current?.({
+      score: scoreRef.current,
+      maxCombo: maxComboRef.current,
+      hits: hitsRef.current,
+      misses: missesRef.current,
+      accuracy: acc,
+    })
+  }, [phase])
 
   return (
     <div className="rg-root">
@@ -449,12 +491,18 @@ export function RhythmGame({ motion }: Props) {
         <div className="rg-overlay">
           <h2 className="rg-title">Complete!</h2>
           <div className="rg-results">
-            <div><span>Score</span>     <strong>{score.toLocaleString()}</strong></div>
-            <div><span>Accuracy</span>  <strong>{accuracy}%</strong></div>
-            <div><span>Hits</span>      <strong>{hits}</strong></div>
-            <div><span>Misses</span>    <strong>{misses}</strong></div>
+            <div><span>Score</span>      <strong>{score.toLocaleString()}</strong></div>
+            <div><span>Max Combo</span>  <strong>{maxComboRef.current}×</strong></div>
+            <div><span>Accuracy</span>   <strong>{accuracy}%</strong></div>
+            <div><span>Hits</span>       <strong>{hits}</strong></div>
+            <div><span>Misses</span>     <strong>{misses}</strong></div>
           </div>
-          <button className="rg-start-btn" onClick={startGame}>▶ Play Again</button>
+          <div className="rg-done-btns">
+            <button className="rg-start-btn" onClick={startGame}>▶ Play Again</button>
+            {onExit && (
+              <button className="rg-home-btn" onClick={onExit}>⌂ Menu</button>
+            )}
+          </div>
         </div>
       )}
 
