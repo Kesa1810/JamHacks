@@ -5,9 +5,63 @@ import { createServer as createViteServer } from 'vite'
 import { Tunnel } from 'cloudflared'
 import localtunnel from 'localtunnel'
 import os from 'os'
+import fs from 'fs'
+import path from 'path'
 
 const PORT = 5173
 let tunnelUrl = null
+
+// ─── Collective motion aggregate ──────────────────────────────────────────────
+// Stores the last MAX_SESSIONS sessions from different players.
+// Each entry: { avgHitSpeed, threshold, hitCount, submittedAt }
+// The global recommendation is the hit-count-weighted average threshold.
+
+const AGGREGATE_FILE = path.resolve('./data/motion-aggregate.json')
+const MAX_SESSIONS   = 200   // rolling window — oldest dropped when full
+const MIN_HITS_TO_SUBMIT = 8 // sessions with fewer hits are too noisy to trust
+
+let motionSessions = loadAggregate()
+
+function loadAggregate() {
+  try {
+    fs.mkdirSync(path.dirname(AGGREGATE_FILE), { recursive: true })
+    const raw = fs.readFileSync(AGGREGATE_FILE, 'utf8')
+    return JSON.parse(raw)
+  } catch {
+    return []
+  }
+}
+
+function saveAggregate() {
+  try {
+    fs.writeFileSync(AGGREGATE_FILE, JSON.stringify(motionSessions), 'utf8')
+  } catch {
+    // non-fatal
+  }
+}
+
+function computeGlobalProfile() {
+  if (motionSessions.length === 0) return null
+
+  // Weighted average: sessions with more confirmed hits count more
+  let weightedThresholdSum = 0
+  let weightedSpeedSum = 0
+  let totalWeight = 0
+
+  for (const s of motionSessions) {
+    const w = s.hitCount
+    weightedThresholdSum += s.threshold * w
+    weightedSpeedSum     += s.avgHitSpeed * w
+    totalWeight          += w
+  }
+
+  return {
+    recommendedThreshold: weightedThresholdSum / totalWeight,
+    avgHitSpeed:          weightedSpeedSum / totalWeight,
+    dataPoints:           motionSessions.length,
+    totalSwings:          totalWeight,
+  }
+}
 let tunnelProcess = null
 let tunnelPending = true
 let tunnelRestarting = false
@@ -276,6 +330,41 @@ async function start() {
       tunnelUrl,
       tunnelPending,
     })
+  })
+
+  // Returns the crowd-sourced global motion profile
+  app.get('/api/motion-profile', (_req, res) => {
+    const global = computeGlobalProfile()
+    res.json(global ?? { recommendedThreshold: null, dataPoints: 0, totalSwings: 0 })
+  })
+
+  // Receives a session's calibration data after gameplay
+  app.use(express.json({ limit: '4kb' }))
+  app.post('/api/motion-profile', (req, res) => {
+    const { avgHitSpeed, threshold, hitCount } = req.body ?? {}
+
+    // Validate — reject junk or low-confidence sessions
+    if (
+      typeof avgHitSpeed !== 'number' ||
+      typeof threshold   !== 'number' ||
+      typeof hitCount    !== 'number' ||
+      hitCount < MIN_HITS_TO_SUBMIT   ||
+      threshold < 30 || threshold > 200 ||
+      avgHitSpeed < 50 || avgHitSpeed > 600
+    ) {
+      return res.status(400).json({ error: 'invalid or insufficient data' })
+    }
+
+    motionSessions.push({ avgHitSpeed, threshold, hitCount, submittedAt: Date.now() })
+
+    // Keep rolling window
+    if (motionSessions.length > MAX_SESSIONS) {
+      motionSessions = motionSessions.slice(-MAX_SESSIONS)
+    }
+
+    saveAggregate()
+    console.log(`  Motion profile updated — ${motionSessions.length} sessions, threshold ${threshold.toFixed(1)}°/s from ${hitCount} hits`)
+    res.json({ ok: true, dataPoints: motionSessions.length })
   })
 
   const vite = await createViteServer({

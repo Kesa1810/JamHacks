@@ -27,7 +27,7 @@
 .rg-stat { display: flex; flex-direction: column; align-items: center; gap: 1px; }
 .rg-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: #555; }
 .rg-stat-val   { font-size: 22px; font-weight: 700; color: #eee; }
-.rg-combo      { color: #00e5ff; }
+.rg-combo      { color: #c4aaff; }
 .rg-mult-1     { color: #eee; }
 .rg-mult-2     { color: #ffeb3b; }
 .rg-mult-4     { color: #ff4081; text-shadow: 0 0 12px #ff408188; }
@@ -69,28 +69,56 @@
 .rg-title {
   font-size: 52px;
   font-weight: 900;
-  color: #00e5ff;
-  text-shadow: 0 0 40px #00e5ff99;
+  color: #f0d6ff;
   margin: 0;
-  letter-spacing: .08em;
+  letter-spacing: .06em;
 }
 .rg-sub  { color: #777; font-size: 14px; text-align: center; max-width: 360px; }
 .rg-hint { color: #444; font-size: 13px; }
 .rg-start-btn {
   margin-top: 6px;
   padding: 14px 44px;
-  background: #00e5ff;
-  color: #000;
+  background: #c4aaff;
+  color: #110d1f;
   border: none;
-  border-radius: 8px;
-  font-size: 19px;
+  border-radius: 999px;
+  font-size: 18px;
   font-weight: 800;
   cursor: pointer;
-  transition: transform .1s, box-shadow .1s;
+  transition: transform .1s, background .1s;
   letter-spacing: .04em;
 }
-.rg-start-btn:hover   { transform: scale(1.05); box-shadow: 0 0 28px #00e5ff99; }
+.rg-start-btn:hover   { transform: scale(1.05); background: #d8b4fe; }
 .rg-start-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+.rg-sens { color: #a78bfa; font-size: 18px; }
+
+.rg-crowd-note {
+  font-size: 12px;
+  color: #4a3870;
+  margin: 0;
+}
+
+.rg-calibration-note {
+  font-size: 12px;
+  color: #6b5a8a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rg-reset-cal {
+  background: none;
+  border: 1px solid #3d2d6e;
+  color: #6b5a8a;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.rg-reset-cal:hover { color: #c4aaff; border-color: #c4aaff; }
 
 .rg-results {
   display: flex;
@@ -116,19 +144,16 @@
   position: relative;
   flex: 1;
   overflow: hidden;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(0,229,255,.07) 0%, transparent 60%),
-    radial-gradient(ellipse at 50% 100%, rgba(255,0,128,.05) 0%, transparent 50%),
-    linear-gradient(180deg, #060812 0%, #0a1020 60%, #120818 100%);
+  background: #0a0815;
 }
 
 /* Perspective grid floor — gives depth */
 .rg-grid-floor {
   position: absolute;
   inset: 40% -40% -20%;
-  background:
-    linear-gradient(rgba(0,229,255,.12) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,229,255,.12) 1px, transparent 1px);
+  background-image:
+    linear-gradient(rgba(196,170,255,.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(196,170,255,.1) 1px, transparent 1px);
   background-size: 60px 60px;
   transform: perspective(500px) rotateX(70deg);
   transform-origin: top center;
@@ -140,29 +165,24 @@
 .rg-lane-guide {
   position: absolute;
   top: 10%;
-  bottom: 28%;
+  bottom: 22%;
   width: 1px;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(255,0,128,.15) 40%,
-    rgba(255,0,128,.4) 100%
-  );
+  background: rgba(196,170,255,.18);
   transform: translateX(-50%);
   pointer-events: none;
 }
 
-/* Hit zone — horizontal glow line near bottom */
+/* Hit zone — horizontal line where saber meets blocks */
 .rg-hit-zone {
   position: absolute;
-  bottom: 28%;
+  bottom: 22%;
   left: 5%;
   right: 5%;
-  height: 3px;
+  height: 2px;
   border-radius: 999px;
-  background: linear-gradient(90deg, transparent, #00e5ff, #ff0080, #00e5ff, transparent);
-  box-shadow: 0 0 18px #00e5ff88, 0 0 8px #ff008088;
-  opacity: .75;
+  background: #c4aaff;
+  box-shadow: 0 0 14px #c4aaff88;
+  opacity: .6;
   pointer-events: none;
 }
 
@@ -192,16 +212,21 @@
   100% { opacity: 0; filter: grayscale(1) brightness(.25); }
 }
 
-/* ── Bottom-right saber ── */
+/* ── Free-moving saber ── */
 .rg-saber-anchor {
   position: absolute;
-  bottom: 32px;
-  right: 48px;
+  /* left/top are set inline by FreeSaber; these are fallback defaults */
+  left: 50%;
+  top: 70%;
+  /* Pivot from handle base (bottom-center of the rig) */
+  transform: translate(-50%, 0);
   width: 60px;
   height: 300px;
-  /* Pivot point is handle = bottom of rig */
   transform-origin: bottom center;
   z-index: 15;
+  /* Smooth position changes so movement looks physical, not teleporting */
+  transition: left 0.06s ease-out, top 0.06s ease-out;
+  will-change: left, top;
 }
 
 .rg-saber-rig {
@@ -210,7 +235,8 @@
   height: 300px;
   transform-origin: bottom center;
   transform-style: preserve-3d;
-  transition: transform .12s ease-out;
+  /* Fast enough to feel live, slow enough to look physical */
+  transition: transform .07s ease-out;
   will-change: transform;
 }
 
@@ -222,8 +248,8 @@
   height: 80px;
   margin-left: -13px;
   border-radius: 8px;
-  background: linear-gradient(180deg, #555, #222);
-  box-shadow: inset 0 0 8px rgba(255,255,255,.15);
+  background: #3a3040;
+  box-shadow: inset 0 0 8px rgba(255,255,255,.1);
 }
 
 .rg-saber-guard {
@@ -234,8 +260,8 @@
   height: 9px;
   margin-left: -21px;
   border-radius: 4px;
-  background: #888;
-  box-shadow: 0 0 6px #00e5ff66;
+  background: #7a6a9a;
+  box-shadow: 0 0 6px #c4aaff55;
 }
 
 .rg-saber-blade {
@@ -252,15 +278,15 @@
   width: 100%;
   height: 100%;
   border-radius: 999px 999px 4px 4px;
-  background: linear-gradient(180deg, #fff 0%, #00e5ff 30%, #0088ff 100%);
-  transition: box-shadow .08s;
+  background: #d8b4fe;
+  transition: box-shadow .06s;
 }
 
 .rg-blade-glow {
   position: absolute;
   inset: -10px -18px;
-  background: radial-gradient(circle, rgba(0,229,255,.5), transparent 70%);
-  filter: blur(8px);
+  background: rgba(196,170,255,.35);
+  filter: blur(10px);
   z-index: -1;
   pointer-events: none;
 }

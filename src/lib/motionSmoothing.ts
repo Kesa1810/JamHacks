@@ -41,6 +41,8 @@ export function emptySmoothedMotion(): MotionData {
     az: null,
     posX: 0,
     posY: 0,
+    tiltX: 0,
+    tiltY: 0,
     velX: 0,
     velY: 0,
     sliceDirection: 'none',

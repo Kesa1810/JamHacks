@@ -16,6 +16,9 @@ export type MotionData = {
   az: number | null
   posX: number
   posY: number
+  // Raw angle offsets from calibration baseline (degrees). Used for 1:1 saber tilt.
+  tiltX: number  // dGamma — positive = phone tilted right
+  tiltY: number  // -dBeta  — positive = phone tilted back/up
   swingSpeed: number
   timestamp: number
   velX: number
@@ -44,6 +47,8 @@ export function emptyMotion(): MotionData {
     az: null,
     posX: 0,
     posY: 0,
+    tiltX: 0,
+    tiltY: 0,
     swingSpeed: 0,
     timestamp: Date.now(),
     velX: 0,
@@ -62,20 +67,23 @@ export function withPosition(
   const dBeta = beta - baseline.beta
   const dGamma = gamma - baseline.gamma
 
-  // Tilt phone right → saber moves right. Tilt up → saber moves up.
-  const tiltX = dGamma * 6
-  const tiltY = -dBeta * 6
-  const swingX = (data.ax ?? 0) * 12
-  const swingY = (data.ay ?? 0) * 12
+  // tiltX/tiltY are raw degree offsets — used for 1:1 saber rotation
+  const tiltX = dGamma           // + = phone tilted right
+  const tiltY = -dBeta           // + = phone tilted back (up)
 
+  // posX/posY: exaggerated for legacy position-based calculations
   const ax = data.ax ?? 0
   const ay = data.ay ?? 0
   const az = data.az ?? 0
+  const swingX = ax * 10
+  const swingY = ay * 10
 
   return {
     ...data,
-    posX: Math.max(-180, Math.min(180, tiltX + swingX)),
-    posY: Math.max(-180, Math.min(180, tiltY + swingY)),
+    tiltX,
+    tiltY,
+    posX: Math.max(-180, Math.min(180, tiltX * 5 + swingX)),
+    posY: Math.max(-180, Math.min(180, tiltY * 5 + swingY)),
     swingSpeed: Math.sqrt(ax * ax + ay * ay + az * az),
     velX: data.velX ?? 0,
     velY: data.velY ?? 0,

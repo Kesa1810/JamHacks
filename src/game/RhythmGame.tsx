@@ -1,6 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { MotionData, SliceDirection } from '../types/motion'
 import { createSliceTracker, enrichWithSlice } from '../lib/sliceMotion'
+import {
+  loadProfile,
+  saveProfile,
+  resetProfile,
+  updateOnHit,
+  updateOnNearMiss,
+  blendGlobalProfile,
+  submitSessionToServer,
+  type MotionProfile,
+} from '../lib/adaptiveProfile'
 import './RhythmGame.css'
 
 // ─── Tunable constants ────────────────────────────────────────────────────────
@@ -47,44 +57,54 @@ const DIR_COLOR: Record<NoteDir, { border: string; bg: string; glow: string }> =
 
 let noteIdCounter = 0
 
-// ─── Saber component (bottom-right, reacts to motion) ────────────────────────
+// ─── Saber — free-moving, tracks phone position AND orientation ───────────────
 interface SaberProps {
   motion: MotionData | null
   lastSwingDir: NoteDir | null
 }
 
-function BottomRightSaber({ motion, lastSwingDir }: SaberProps) {
-  // Pivot the saber based on phone tilt/swing
-  const posX  = motion?.posX  ?? 0
-  const posY  = motion?.posY  ?? 0
+function FreeSaber({ motion, lastSwingDir }: SaberProps) {
+  const tiltX = motion?.tiltX ?? 0   // dGamma: right tilt = positive
+  const tiltY = motion?.tiltY ?? 0   // -dBeta: upward tilt = positive
   const speed = motion?.swingSpeed ?? 0
-  const glow  = 28 + Math.min(speed * 10, 60)
+  const glow  = 24 + Math.min(speed * 8, 50)
 
-  // Tilt the saber: rotateZ from posX, rotateX from posY
-  const rotZ = posX * 0.18
-  const rotX = posY * 0.12
+  // ── Screen position ────────────────────────────────────────────────────────
+  // Map phone tilt angles to % position on screen.
+  // Horizontal: tiltX ±60° → 20% – 80% of width
+  // Vertical:   tiltY ±45° → 30% – 85% of height (inverted: tilt up → saber moves up)
+  const clampedX = Math.max(-60, Math.min(60, tiltX))
+  const clampedY = Math.max(-45, Math.min(45, tiltY))
+  const screenLeft = 50 + clampedX * (30 / 60)          // 20–80%
+  const screenTop  = 70 - clampedY * (35 / 45)          // 35–85% (up = lower % = higher on page)
 
-  // On swing, snap to a dramatic angle then release
-  const swingRotZ = lastSwingDir === 'left'  ? -55
-                  : lastSwingDir === 'right' ?  55
-                  : lastSwingDir === 'up'    ?  0
-                  : lastSwingDir === 'down'  ?  0
+  // ── Rotation ───────────────────────────────────────────────────────────────
+  // Saber rotates to match phone angle — 1:1 with tilt
+  const baseRotZ = Math.max(-75, Math.min(75, tiltX))
+  const baseRotX = Math.max(-45, Math.min(45, tiltY * 0.5))
+
+  // On swing: snap to dramatic angle
+  const swingRotZ = lastSwingDir === 'left'  ? -70
+                  : lastSwingDir === 'right' ?  70
                   : 0
-  const swingRotX = lastSwingDir === 'up'   ? -40
-                  : lastSwingDir === 'down' ?  40
+  const swingRotX = lastSwingDir === 'up'   ? -55
+                  : lastSwingDir === 'down' ?  55
                   : 0
 
-  const finalRotZ = rotZ + swingRotZ
-  const finalRotX = rotX + swingRotX
+  const finalRotZ = lastSwingDir ? swingRotZ : baseRotZ
+  const finalRotX = lastSwingDir ? swingRotX : baseRotX
 
   return (
-    <div className="rg-saber-anchor">
+    <div
+      className="rg-saber-anchor"
+      style={{ left: `${screenLeft}%`, top: `${screenTop}%` }}
+    >
       <div
         className="rg-saber-rig"
         style={{ transform: `rotateZ(${finalRotZ}deg) rotateX(${finalRotX}deg)` }}
       >
         <div className="rg-saber-blade">
-          <div className="rg-blade-core" style={{ boxShadow: `0 0 ${glow}px #00e5ff` }} />
+          <div className="rg-blade-core" style={{ boxShadow: `0 0 ${glow}px #c4aaff` }} />
           <div className="rg-blade-glow" />
         </div>
         <div className="rg-saber-guard" />
@@ -111,6 +131,7 @@ export function RhythmGame({ motion }: Props) {
   const [audioTime, setAudioTime]   = useState(0)
   const [feedback, setFeedback]     = useState<{ text: string; ok: boolean } | null>(null)
   const [lastSwingDir, setLastSwingDir] = useState<NoteDir | null>(null)
+  const [profile, setProfile]       = useState<MotionProfile>(loadProfile)
 
   const audioRef          = useRef<HTMLAudioElement | null>(null)
   const nextNoteIndexRef  = useRef(0)
@@ -120,6 +141,8 @@ export function RhythmGame({ motion }: Props) {
   const comboRef          = useRef(0)
   const multRef           = useRef(1)
   const activeNotesRef    = useRef<ActiveNote[]>([])
+  const profileRef        = useRef<MotionProfile>(profile)
+  profileRef.current = profile
 
   comboRef.current = combo
   multRef.current  = multiplier
@@ -130,6 +153,13 @@ export function RhythmGame({ motion }: Props) {
       .then((r) => r.json())
       .then((data: Beatmap) => setBeatmap(data))
       .catch(() => console.error('Could not load /beatmap.json'))
+  }, [])
+
+  // Blend crowd-sourced global profile into local on mount
+  useEffect(() => {
+    blendGlobalProfile(profileRef.current).then((blended) => {
+      setProfile(blended)
+    })
   }, [])
 
   const showFeedback = useCallback((text: string, ok: boolean) => {
@@ -200,15 +230,38 @@ export function RhythmGame({ motion }: Props) {
   // ── Phone motion → swing ───────────────────────────────────────────────────
   useEffect(() => {
     if (!motion || phase !== 'playing') return
-    const { data: enriched, state: next } = enrichWithSlice(motion, sliceStateRef.current)
+
+    const { data: enriched, state: next, angSpeed } = enrichWithSlice(
+      motion,
+      sliceStateRef.current,
+      profileRef.current.threshold,
+    )
     sliceStateRef.current = next
+
     const dir   = enriched.sliceDirection as SliceDirection
     const power = enriched.slicePower ?? 0
+
     if (swingArmedRef.current && power >= SWING_ARM_POWER && dir !== 'none') {
       swingArmedRef.current = false
+      // Record this swing speed for adaptive calibration
+      const updated = updateOnHit(profileRef.current, angSpeed)
+      setProfile(updated)
+      saveProfile(updated)
       handleSwing(dir as NoteDir)
     } else if (!swingArmedRef.current && power < SWING_RESET_POW) {
       swingArmedRef.current = true
+    }
+
+    // Near-miss: phone moved fast but didn't cross threshold — loosen it
+    if (
+      swingArmedRef.current &&
+      motion.swingSpeed > 14 &&
+      angSpeed > profileRef.current.threshold * 0.65 &&
+      power < SWING_ARM_POWER
+    ) {
+      const updated = updateOnNearMiss(profileRef.current)
+      setProfile(updated)
+      saveProfile(updated)
     }
   }, [motion, phase, handleSwing])
 
@@ -261,6 +314,7 @@ export function RhythmGame({ motion }: Props) {
           now > (notes[notes.length - 1]?.time ?? 0) + 2)
       ) {
         setPhase('done')
+        submitSessionToServer(profileRef.current)
         return
       }
 
@@ -293,8 +347,8 @@ export function RhythmGame({ motion }: Props) {
     )
     // Scale from 0.15 (far) to 1.1 (close)
     const scale = 0.15 + progress * 0.95
-    // Y: start at 15% from top, end at 72% (hit zone)
-    const top = 15 + progress * 57
+    // Y: start at 15% from top, end at 78% (hit zone = 22% from bottom)
+    const top = 15 + progress * 63
     // X: lane position (converge slightly from center as they approach)
     const laneX = LANE_X[note.lane] ?? 50
     // Perspective: lanes start tighter near center, spread out as they approach
@@ -347,6 +401,10 @@ export function RhythmGame({ motion }: Props) {
             <span className="rg-stat-label">Acc</span>
             <span className="rg-stat-val">{accuracy}%</span>
           </div>
+          <div className="rg-stat" title={`Adaptive threshold: ${Math.round(profile.threshold)}°/s (${profile.hitCount} swings learned)`}>
+            <span className="rg-stat-label">Sens</span>
+            <span className="rg-stat-val rg-sens">{Math.round(180 / profile.threshold * 10)}%</span>
+          </div>
         </div>
       )}
 
@@ -361,14 +419,28 @@ export function RhythmGame({ motion }: Props) {
       {phase === 'idle' && (
         <div className="rg-overlay">
           <div className="rg-grid-floor" />
-          <h2 className="rg-title">Beat Saber</h2>
+          <h2 className="rg-title">Forest Beats</h2>
           <p className="rg-sub">
-            {beatmap ? `${beatmap.notes.length} notes · ${beatmap.song}` : 'Loading beatmap…'}
+            {beatmap ? `${beatmap.notes.length} notes · ${beatmap.song}` : 'loading beatmap…'}
           </p>
-          <p className="rg-hint">Arrow keys or swing your phone</p>
+          <p className="rg-crowd-note">
+            {profile.hitCount > 0
+              ? `your style · ${profile.hitCount} swings learned`
+              : 'swing detection adapts to you as you play'
+            }
+          </p>
+          <p className="rg-hint">swing your phone or use arrow keys</p>
           <button className="rg-start-btn" onClick={startGame} disabled={!beatmap}>
-            ▶ Start Game
+            ▶ play
           </button>
+          {profile.hitCount > 0 && (
+            <p className="rg-calibration-note">
+              calibrated from {profile.hitCount} swing{profile.hitCount !== 1 ? 's' : ''} ✦{' '}
+              <button className="rg-reset-cal" onClick={() => setProfile(resetProfile())}>
+                reset
+              </button>
+            </p>
+          )}
         </div>
       )}
 
@@ -411,8 +483,8 @@ export function RhythmGame({ motion }: Props) {
             </div>
           ))}
 
-          {/* Saber — bottom right */}
-          <BottomRightSaber motion={motion} lastSwingDir={lastSwingDir} />
+          {/* Saber — free-moving */}
+          <FreeSaber motion={motion} lastSwingDir={lastSwingDir} />
         </div>
       )}
     </div>
