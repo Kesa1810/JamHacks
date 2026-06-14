@@ -1,13 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './Menu.css';
 
 interface MenuProps {
-  onPlay: () => void
+  onPlay: (mapKey: string) => void
 }
 
+const MAPS = [
+  { key: 'beauty-and-a-beat', label: 'Beauty And A Beat' },
+  { key: 'animals',           label: 'Animals' },
+]
+
 const Menu: React.FC<MenuProps> = ({ onPlay }) => {
+  const [selectedMap, setSelectedMap] = useState('beauty-and-a-beat')
+  const [showMapPicker, setShowMapPicker] = useState(false)
+
   const handleAction = (action: string) => {
-    if (action === 'play / resume') { onPlay(); return; }
+    if (action === 'play / resume') { onPlay(selectedMap); return; }
+    if (action === 'choose map') { setShowMapPicker((v) => !v); return; }
     console.log(`${action} clicked`);
   };
 
@@ -66,6 +75,22 @@ const Menu: React.FC<MenuProps> = ({ onPlay }) => {
             </button>
           ))}
         </nav>
+
+        {showMapPicker && (
+          <div className="map-picker">
+            <p className="map-picker-label">select map</p>
+            {MAPS.map((m) => (
+              <button
+                key={m.key}
+                type="button"
+                className={`map-option${selectedMap === m.key ? ' map-option--selected' : ''}`}
+                onClick={() => setSelectedMap(m.key)}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         <footer className="menu-footer">
           <p>v0.1.0 - glowing forest mode</p>

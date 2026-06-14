@@ -5,7 +5,7 @@ import Menu from './Menu'
 
 function MenuPage() {
   const navigate = useNavigate()
-  return <Menu onPlay={() => navigate('/game')} />
+  return <Menu onPlay={(map) => navigate('/game', { state: { map } })} />
 }
 
 export default function App() {

@@ -15,6 +15,19 @@ import {
 import { GlbCube } from './GlbBlocksLayer'
 import './RhythmGame.css'
 
+// --- Song catalogue -----------------------------------------------------------
+const SONGS: Record<string, { beatmapUrl: string; audioUrl: string }> = {
+  'beauty-and-a-beat': {
+    beatmapUrl: '/beatmap.json',
+    audioUrl:   '/song.mp3',
+  },
+  'animals': {
+    beatmapUrl: '/beatmap (4).json',
+    audioUrl:   '/Martin Garrix - Animals (Official Video) - Martin Garrix (128k).mp3',
+  },
+}
+const DEFAULT_MAP = 'beauty-and-a-beat'
+
 // --- Tunable defaults (runtime-adjustable via settings sliders) ---------------
 const LEAD_TIME_DEFAULT   = 2.6   // seconds a block is visible before its hit time
 const HIT_WINDOW_DEFAULT  = 0.35  // +/- seconds that count as a hit
@@ -202,9 +215,10 @@ function CalibrationScreen({ motionRef, onComplete }: CalibrationProps) {
 interface Props {
   socketRef: React.RefObject<Socket | null>
   connected: boolean
+  mapKey?: string
 }
 
-export function RhythmGame({ socketRef, connected }: Props) {
+export function RhythmGame({ socketRef, connected, mapKey = DEFAULT_MAP }: Props) {
   const [phase, setPhase]             = useState<'idle' | 'calibrating' | 'playing' | 'done'>('idle')
   const [beatmap, setBeatmap]         = useState<Beatmap | null>(null)
   const [activeNotes, setActiveNotes] = useState<ActiveNote[]>([])
@@ -267,11 +281,12 @@ export function RhythmGame({ socketRef, connected }: Props) {
   }, [])
 
   useEffect(() => {
-    fetch('/beatmap.json')
+    const { beatmapUrl } = SONGS[mapKey] ?? SONGS[DEFAULT_MAP]
+    fetch(beatmapUrl)
       .then((r) => r.json())
       .then((data: Beatmap) => setBeatmap(data))
-      .catch(() => console.error('Could not load /beatmap.json'))
-  }, [])
+      .catch(() => console.error(`Could not load ${beatmapUrl}`))
+  }, [mapKey])
 
   const showFeedback = useCallback((text: string, ok: boolean) => {
     setFeedback({ text, ok })
@@ -577,7 +592,8 @@ export function RhythmGame({ socketRef, connected }: Props) {
     if (!beatmap) return
     if (cal) calibrationRef.current = cal
     if (saberOffset) saberOffsetRef.current = saberOffset
-    const audio = new Audio('/song.mp3')
+    const { audioUrl } = SONGS[mapKey] ?? SONGS[DEFAULT_MAP]
+    const audio = new Audio(audioUrl)
     audioRef.current = audio
     nextNoteIndexRef.current = 0
     gammaSmootherRef.current.reset()

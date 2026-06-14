@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import { useSocket } from '../hooks/useSocket'
 import { createSessionId } from '../lib/session'
@@ -11,6 +12,9 @@ interface HostPageProps {
 }
 
 export function HostPage({ onExit }: HostPageProps) {
+  const location = useLocation()
+  const mapKey = (location.state as { map?: string } | null)?.map ?? 'beauty-and-a-beat'
+
   const [sessionId] = useState(createSessionId)
   const [network, setNetwork] = useState<NetworkInfo | null>(null)
   const [selectedIp, setSelectedIp] = useState('')
@@ -207,7 +211,7 @@ export function HostPage({ onExit }: HostPageProps) {
 
       {controllerConnected && (
         <main className="arena">
-          <RhythmGame socketRef={socketRef} connected={socketConnected} />
+          <RhythmGame socketRef={socketRef} connected={socketConnected} mapKey={mapKey} />
         </main>
       )}
     </div>
