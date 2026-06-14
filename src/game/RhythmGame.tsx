@@ -337,44 +337,44 @@ export function RhythmGame({ motion }: Props) {
     await audio.play()
   }, [beatmap])
 
-  // -- Block position: scale + translate for "coming at you" illusion ---------
-  // progress 0 = just spawned (far, tiny), 1 = at hit zone (close, full size)
-  // hit zone is at bottom 20% of arena
+  // -- Block position: true CSS 3D perspective --------------------------------
+  // Blocks sit at their lane X and hit-zone Y, and fly toward the camera on Z.
+  // The arena has perspective + elevated perspective-origin so far blocks appear
+  // near the top of the screen and close blocks appear at the bottom — just like
+  // Beat Saber's vanishing-point approach.
+  //
+  // progress 0 = just spawned (deep in Z), 1 = arrived at hit zone (Z = 0)
+  const Z_SPAWN = -1400   // px back into the screen at spawn
+  const Z_HIT   =  120    // px in front of camera at hit (slightly past player)
+
   const getBlockStyle = (note: ActiveNote): React.CSSProperties => {
     const progress = Math.min(
       (audioTime - (note.time - LEAD_TIME)) / LEAD_TIME,
       1,
     )
-    // Scale from 0.15 (far) to 1.1 (close)
-    const scale = 0.15 + progress * 0.95
-    // Y: start at 15% from top, end at 78% (hit zone = 22% from bottom)
-    const top = 15 + progress * 63
-    // X: lane position (converge slightly from center as they approach)
     const laneX = LANE_X[note.lane] ?? 50
-    // Perspective: lanes start tighter near center, spread out as they approach
-    const startX = 50
-    const x = startX + (laneX - startX) * progress
-
+    const z = Z_SPAWN + progress * (Z_HIT - Z_SPAWN)
     const c = DIR_COLOR[note.direction]
+
     return {
       position: 'absolute',
-      left: `${x}%`,
-      top: `${top}%`,
-      transform: `translate(-50%, -50%) scale(${scale})`,
-      width: '90px',
-      height: '90px',
-      borderRadius: '12px',
+      left: `${laneX}%`,
+      top: '72%',           // fixed in the hit zone — perspective does the rest
+      transform: `translate(-50%, -50%) translateZ(${z}px)`,
+      width: '88px',
+      height: '88px',
+      borderRadius: '14px',
       border: `3px solid ${c.border}`,
       background: c.bg,
-      boxShadow: `0 0 ${14 * scale}px ${c.glow}, inset 0 0 ${8 * scale}px ${c.glow}`,
+      boxShadow: `0 0 18px ${c.glow}, inset 0 0 10px ${c.glow}`,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      fontSize: `${36 * scale}px`,
+      fontSize: '32px',
       fontWeight: 900,
       color: c.border,
-      zIndex: Math.round(progress * 10),
       opacity: note.missed ? 0 : 1,
+      // No zIndex needed — Z depth handles draw order naturally
     }
   }
 

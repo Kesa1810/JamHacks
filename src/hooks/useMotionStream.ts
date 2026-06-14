@@ -1,11 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Socket } from 'socket.io-client'
 import { requestMotionAccess, startMotionSensors } from '../lib/deviceMotion'
-import {
-  emptyMotion,
-  withPosition,
-  type MotionData,
-} from '../types/motion'
+import { emptyMotion, withPosition, type MotionData } from '../types/motion'
 
 type Options = {
   enabled: boolean
@@ -13,15 +9,20 @@ type Options = {
   socketRef: React.RefObject<Socket | null>
 }
 
-const EMIT_INTERVAL_MS = 16
+// Socket emit throttle — 8ms cap (~120Hz). Sensors fire at 60-100Hz so this
+// rarely kicks in, but prevents bursts when both orientation+motion events fire
+// in the same millisecond.
+const MIN_EMIT_MS = 8
 
 export function useMotionStream({ enabled, connected, socketRef }: Options) {
   const latestMotion = useRef<MotionData>(emptyMotion())
-  const baseline = useRef<{ beta: number; gamma: number } | null>(null)
+  const baseline     = useRef<{ beta: number; gamma: number } | null>(null)
   const connectedRef = useRef(connected)
-  const [sample, setSample] = useState<MotionData | null>(null)
+  const lastEmit     = useRef(0)
+  const eventCountRef = useRef(0)
+
+  const [sample, setSample]         = useState<MotionData | null>(null)
   const [eventCount, setEventCount] = useState(0)
-  const lastEmit = useRef(0)
 
   connectedRef.current = connected
 
@@ -31,11 +32,13 @@ export function useMotionStream({ enabled, connected, socketRef }: Options) {
       latestMotion.current = emptyMotion()
       setSample(null)
       setEventCount(0)
+      eventCountRef.current = 0
       return
     }
 
     let stopSensors: (() => void) | undefined
     let cancelled = false
+    let rafId = 0
 
     startMotionSensors((reading) => {
       if (reading.beta == null && reading.gamma == null) return
@@ -45,11 +48,11 @@ export function useMotionStream({ enabled, connected, socketRef }: Options) {
       }
 
       const base = baseline.current ?? { beta: reading.beta ?? 0, gamma: reading.gamma ?? 0 }
-      latestMotion.current = withPosition(
+      const data = withPosition(
         {
           ...latestMotion.current,
           alpha: reading.alpha,
-          beta: reading.beta,
+          beta:  reading.beta,
           gamma: reading.gamma,
           ax: reading.ax ?? latestMotion.current.ax,
           ay: reading.ay ?? latestMotion.current.ay,
@@ -58,7 +61,17 @@ export function useMotionStream({ enabled, connected, socketRef }: Options) {
         },
         base,
       )
-      setEventCount((n) => n + 1)
+
+      // Always update the ref immediately — zero React overhead
+      latestMotion.current = data
+      eventCountRef.current += 1
+
+      // Emit to socket directly on sensor event for minimum network latency
+      const now = Date.now()
+      if (connectedRef.current && now - lastEmit.current >= MIN_EMIT_MS) {
+        lastEmit.current = now
+        socketRef.current?.emit('motion', data)
+      }
     })
       .then((stop) => {
         if (cancelled) stop()
@@ -66,30 +79,22 @@ export function useMotionStream({ enabled, connected, socketRef }: Options) {
       })
       .catch(() => {})
 
-    let frame = 0
+    // RAF loop only updates React state — capped at screen refresh rate (60fps).
+    // Keeps renders smooth without causing 120+ re-renders/second.
     const tick = () => {
-      frame = window.requestAnimationFrame(tick)
-
+      rafId = requestAnimationFrame(tick)
       const data = latestMotion.current
       if (data.beta == null && data.gamma == null) return
-
-      const now = Date.now()
-      if (now - lastEmit.current < EMIT_INTERVAL_MS) return
-      lastEmit.current = now
-
-      const frameData = { ...data }
-      setSample(frameData)
-
-      if (connectedRef.current) {
-        socketRef.current?.emit('motion', frameData)
-      }
+      setSample({ ...data })
+      // Sync eventCount to React at 60fps (coarse is fine — just for the "no data" warning)
+      setEventCount(eventCountRef.current)
     }
-    frame = window.requestAnimationFrame(tick)
+    rafId = requestAnimationFrame(tick)
 
     return () => {
       cancelled = true
       stopSensors?.()
-      window.cancelAnimationFrame(frame)
+      cancelAnimationFrame(rafId)
     }
   }, [enabled, socketRef])
 

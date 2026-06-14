@@ -145,53 +145,64 @@
   flex: 1;
   overflow: hidden;
   background: #0a0815;
+
+  /* Real CSS 3D — all children share this perspective */
+  perspective: 520px;
+  /* Elevated focal point: horizon sits at ~18% from top so far blocks appear
+     near the top of the screen and close blocks appear at the bottom */
+  perspective-origin: 50% 18%;
+  transform-style: preserve-3d;
 }
 
-/* Perspective grid floor - gives depth */
+/* 3D grid floor — a flat plane receding into the distance */
 .rg-grid-floor {
   position: absolute;
-  inset: 40% -40% -20%;
+  left: -50%;
+  right: -50%;
+  top: 72%;          /* anchored at the hit zone */
+  height: 300%;
   background-image:
-    linear-gradient(rgba(196,170,255,.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(196,170,255,.1) 1px, transparent 1px);
-  background-size: 60px 60px;
-  transform: perspective(500px) rotateX(70deg);
+    linear-gradient(rgba(196,170,255,.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(196,170,255,.12) 1px, transparent 1px);
+  background-size: 80px 80px;
+  transform: rotateX(85deg);
   transform-origin: top center;
-  opacity: .5;
+  transform-style: preserve-3d;
+  opacity: .55;
   pointer-events: none;
 }
 
-/* Vanishing-point lane guides */
+/* Lane guides — vertical lines that converge at the vanishing point */
 .rg-lane-guide {
   position: absolute;
-  top: 10%;
-  bottom: 22%;
+  top: 0;
+  bottom: 0;
   width: 1px;
-  background: rgba(196,170,255,.18);
+  background: rgba(196,170,255,.14);
   transform: translateX(-50%);
   pointer-events: none;
 }
 
-/* Hit zone - horizontal line where saber meets blocks */
+/* Hit zone — glowing line at the player's strike plane */
 .rg-hit-zone {
   position: absolute;
-  bottom: 22%;
-  left: 5%;
-  right: 5%;
+  top: 72%;
+  left: 0;
+  right: 0;
   height: 2px;
-  border-radius: 999px;
   background: #c4aaff;
-  box-shadow: 0 0 14px #c4aaff88;
-  opacity: .6;
+  box-shadow: 0 0 18px #c4aaff, 0 0 40px #c4aaff55;
+  opacity: .7;
   pointer-events: none;
+  z-index: 5;
 }
 
 /* -- Block -- */
-/* Inline styles handle position/scale/color; class handles animation states */
 .rg-block {
   pointer-events: none;
-  transition: none;
-  will-change: transform, top, opacity;
+  will-change: transform;
+  /* Blocks live in the arena's 3D space */
+  transform-style: preserve-3d;
 }
 
 .rg-block--explode {
@@ -215,17 +226,14 @@
 /* -- Free-moving saber -- */
 .rg-saber-anchor {
   position: absolute;
-  /* left/top are set inline by FreeSaber; these are fallback defaults */
   left: 50%;
   top: 70%;
-  /* Pivot from handle base (bottom-center of the rig) */
   transform: translate(-50%, 0);
   width: 60px;
   height: 300px;
   transform-origin: bottom center;
   z-index: 15;
-  /* Smooth position changes so movement looks physical, not teleporting */
-  transition: left 0.06s ease-out, top 0.06s ease-out;
+  /* No transition — instant response eliminates visual lag */
   will-change: left, top;
 }
 
@@ -235,8 +243,7 @@
   height: 300px;
   transform-origin: bottom center;
   transform-style: preserve-3d;
-  /* Fast enough to feel live, slow enough to look physical */
-  transition: transform .07s ease-out;
+  /* No transition — matches phone in real time */
   will-change: transform;
 }
 
