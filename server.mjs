@@ -389,7 +389,7 @@ async function start() {
     process.exit(1)
   })
 
-  httpServer.listen(PORT, '0.0.0.0', () => {
+httpServer.listen(PORT, '0.0.0.0', () => {
     console.log(`\n  SaberSync running:`)
     console.log(`  Local:   http://localhost:${PORT}`)
     console.log('  Tunnel:  starting public https link...')
