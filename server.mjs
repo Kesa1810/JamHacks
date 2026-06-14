@@ -11,13 +11,13 @@ import path from 'path'
 const PORT = 5173
 let tunnelUrl = null
 
-// ─── Collective motion aggregate ──────────────────────────────────────────────
+// --- Collective motion aggregate ----------------------------------------------
 // Stores the last MAX_SESSIONS sessions from different players.
 // Each entry: { avgHitSpeed, threshold, hitCount, submittedAt }
 // The global recommendation is the hit-count-weighted average threshold.
 
 const AGGREGATE_FILE = path.resolve('./data/motion-aggregate.json')
-const MAX_SESSIONS   = 200   // rolling window — oldest dropped when full
+const MAX_SESSIONS   = 200   // rolling window - oldest dropped when full
 const MIN_HITS_TO_SUBMIT = 8 // sessions with fewer hits are too noisy to trust
 
 let motionSessions = loadAggregate()
@@ -163,7 +163,7 @@ function announceTunnel(tunnel) {
   tunnelPending = false
   tunnelRestarting = false
   io?.emit('tunnel-ready', { tunnelUrl })
-  console.log(`  Tunnel:  ${tunnelUrl}  ← scan from any phone (${tunnel.kind})`)
+  console.log(`  Tunnel:  ${tunnelUrl}  <- scan from any phone (${tunnel.kind})`)
 
   const onLost = () => {
     if (tunnelProcess !== tunnel) return
@@ -171,7 +171,7 @@ function announceTunnel(tunnel) {
     tunnelPending = true
     tunnelProcess = null
     io?.emit('tunnel-lost')
-    console.log('  Tunnel lost — reconnecting…')
+    console.log('  Tunnel lost - reconnecting...')
     queueTunnelRestart(PORT)
   }
 
@@ -343,7 +343,7 @@ async function start() {
   app.post('/api/motion-profile', (req, res) => {
     const { avgHitSpeed, threshold, hitCount } = req.body ?? {}
 
-    // Validate — reject junk or low-confidence sessions
+    // Validate - reject junk or low-confidence sessions
     if (
       typeof avgHitSpeed !== 'number' ||
       typeof threshold   !== 'number' ||
@@ -363,7 +363,7 @@ async function start() {
     }
 
     saveAggregate()
-    console.log(`  Motion profile updated — ${motionSessions.length} sessions, threshold ${threshold.toFixed(1)}°/s from ${hitCount} hits`)
+    console.log(`  Motion profile updated - ${motionSessions.length} sessions, threshold ${threshold.toFixed(1)} deg/s from ${hitCount} hits`)
     res.json({ ok: true, dataPoints: motionSessions.length })
   })
 
@@ -392,7 +392,7 @@ async function start() {
   httpServer.listen(PORT, '0.0.0.0', () => {
     console.log(`\n  SaberSync running:`)
     console.log(`  Local:   http://localhost:${PORT}`)
-    console.log('  Tunnel:  starting public https link…')
+    console.log('  Tunnel:  starting public https link...')
 
     startReliableTunnel(PORT)
       .then((tunnel) => announceTunnel(tunnel))

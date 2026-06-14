@@ -143,7 +143,7 @@ export function motionErrorMessage(code: string, platform: MotionSupport['platfo
     case 'not_supported':
       return 'Use Safari on iPhone or Chrome on Android with the https tunnel link.'
     case 'insecure':
-      return 'Open the https tunnel link from your computer — motion does not work on http.'
+      return 'Open the https tunnel link from your computer - motion does not work on http.'
     case 'blocked':
       return platform === 'ios'
         ? 'Tap Allow when asked. If blocked, follow the iPhone steps below, then try again.'
@@ -154,16 +154,16 @@ export function motionErrorMessage(code: string, platform: MotionSupport['platfo
 }
 
 export const IOS_MOTION_STEPS = [
-  'Open iPhone Settings → Safari',
+  'Open iPhone Settings -> Safari',
   'Turn ON Motion & Orientation Access',
-  'Also check Settings → Privacy & Security → Motion & Fitness → Fitness Tracking ON',
+  'Also check Settings -> Privacy & Security -> Motion & Fitness -> Fitness Tracking ON',
   'Force-close Safari completely, reopen this link',
   'Tap Allow Motion & Orientation when the popup appears',
 ]
 
 export const ANDROID_MOTION_STEPS = [
   'When the popup appears, tap Allow for motion sensors',
-  'If blocked: Chrome ⋮ → Settings → Site settings → Motion sensors → Allowed',
-  'Or: Android Settings → Apps → Chrome → Permissions → Physical activity / Sensors → Allow',
+  'If blocked: Chrome menu -> Settings -> Site settings -> Motion sensors -> Allowed',
+  'Or: Android Settings -> Apps -> Chrome -> Permissions -> Physical activity / Sensors -> Allow',
   'Reload this page and tap Allow Motion & Orientation again',
 ]

@@ -61,11 +61,11 @@ export function MotionPermissionModal({
           onClick={onAllow}
           disabled={loading || !support.isSecureContext}
         >
-          {loading ? 'Requesting…' : 'Allow Motion & Orientation'}
+          {loading ? 'Requesting...' : 'Allow Motion & Orientation'}
         </button>
 
         {!connected && support.isSecureContext && (
-          <p className="modal-hint">Connecting to host… you can allow motion now.</p>
+          <p className="modal-hint">Connecting to host... you can allow motion now.</p>
         )}
 
         {errorKind && errorKind !== 'blocked' && (

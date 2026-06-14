@@ -1,4 +1,4 @@
-/* ── Root ── */
+/* -- Root -- */
 .rg-root {
   position: relative;
   width: 100%;
@@ -11,7 +11,7 @@
   font-family: system-ui, sans-serif;
 }
 
-/* ── HUD strip ── */
+/* -- HUD strip -- */
 .rg-hud {
   position: absolute;
   top: 0; left: 0; right: 0;
@@ -32,7 +32,7 @@
 .rg-mult-2     { color: #ffeb3b; }
 .rg-mult-4     { color: #ff4081; text-shadow: 0 0 12px #ff408188; }
 
-/* ── Feedback flash ── */
+/* -- Feedback flash -- */
 .rg-feedback {
   position: absolute;
   top: 22%;
@@ -53,7 +53,7 @@
   100% { opacity: 0; transform: translateX(-50%) scale(.9); }
 }
 
-/* ── Overlays (idle/done) ── */
+/* -- Overlays (idle/done) -- */
 .rg-overlay {
   position: absolute;
   inset: 0;
@@ -139,7 +139,7 @@
 }
 .rg-results strong { color: #eee; font-size: 16px; }
 
-/* ── Arena (playing) ── */
+/* -- Arena (playing) -- */
 .rg-arena {
   position: relative;
   flex: 1;
@@ -147,7 +147,7 @@
   background: #0a0815;
 }
 
-/* Perspective grid floor — gives depth */
+/* Perspective grid floor - gives depth */
 .rg-grid-floor {
   position: absolute;
   inset: 40% -40% -20%;
@@ -172,7 +172,7 @@
   pointer-events: none;
 }
 
-/* Hit zone — horizontal line where saber meets blocks */
+/* Hit zone - horizontal line where saber meets blocks */
 .rg-hit-zone {
   position: absolute;
   bottom: 22%;
@@ -186,7 +186,7 @@
   pointer-events: none;
 }
 
-/* ── Block ── */
+/* -- Block -- */
 /* Inline styles handle position/scale/color; class handles animation states */
 .rg-block {
   pointer-events: none;
@@ -212,7 +212,7 @@
   100% { opacity: 0; filter: grayscale(1) brightness(.25); }
 }
 
-/* ── Free-moving saber ── */
+/* -- Free-moving saber -- */
 .rg-saber-anchor {
   position: absolute;
   /* left/top are set inline by FreeSaber; these are fallback defaults */

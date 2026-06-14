@@ -35,7 +35,7 @@ export function LightsaberView({ motion, connected, beatMode = false }: Props) {
         <>
           <div className="beat-hud">
             <p className="beat-title">Beat Saber Mode</p>
-            <p className="beat-subtitle">Swing your phone — saber follows on screen</p>
+            <p className="beat-subtitle">Swing your phone - saber follows on screen</p>
           </div>
 
           <div className="lane lane-left">
@@ -70,7 +70,7 @@ export function LightsaberView({ motion, connected, beatMode = false }: Props) {
 
         {connected && !motion && (
           <div className="idle-message">
-            <p>Phone connected — allow motion on your phone</p>
+            <p>Phone connected - allow motion on your phone</p>
             <p className="small">Hold phone steady, then swing from center</p>
           </div>
         )}
@@ -91,7 +91,7 @@ export function LightsaberView({ motion, connected, beatMode = false }: Props) {
       </div>
 
       {!beatMode && (
-        <p className="coming-soon">Beat blocks coming soon — slice through the lanes</p>
+        <p className="coming-soon">Beat blocks coming soon - slice through the lanes</p>
       )}
     </div>
   )

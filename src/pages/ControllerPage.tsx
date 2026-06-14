@@ -70,12 +70,12 @@ export function ControllerPage() {
 
       <header className="controller-top">
         <div>
-          <p className="eyebrow">SaberSync · Motion Controller</p>
+          <p className="eyebrow">SaberSync - Motion Controller</p>
           <p className="session-code">{sessionId}</p>
         </div>
         <div className={`status-pill ${connected ? 'online' : ''}`}>
           <span className="status-dot" />
-          {connected ? 'Connected' : 'Connecting…'}
+          {connected ? 'Connected' : 'Connecting...'}
         </div>
       </header>
 
@@ -107,7 +107,7 @@ export function ControllerPage() {
 
       {motionActive && (
         <div className="motion-active-panel">
-          <p className="active-label">Swing your phone — saber follows on the computer</p>
+          <p className="active-label">Swing your phone - saber follows on the computer</p>
           <div className="motion-actions">
             <button type="button" className="recalibrate-btn" onClick={motion.recalibrate}>
               Reset center
@@ -118,7 +118,7 @@ export function ControllerPage() {
           </div>
           {motion.eventCount === 0 && (
             <p className="hint-label">
-              No sensor data yet — tap Motion settings and allow access.
+              No sensor data yet - tap Motion settings and allow access.
             </p>
           )}
         </div>

@@ -13,7 +13,7 @@
   overflow: hidden;
 }
 
-/* ── connect screen (waiting for phone) ── */
+/* -- connect screen (waiting for phone) -- */
 
 .connect-screen {
   max-width: 400px;
@@ -57,7 +57,7 @@
   font-size: 0.95rem;
 }
 
-/* ── QR card ── */
+/* -- QR card -- */
 
 .qr-card {
   display: flex;
@@ -78,7 +78,7 @@
   font-size: 0.9rem;
 }
 
-/* ── session id ── */
+/* -- session id -- */
 
 .session-label {
   margin: 0.5rem 0 0;
@@ -96,7 +96,7 @@
   color: #e8d5ff;
 }
 
-/* ── link row ── */
+/* -- link row -- */
 
 .url-row {
   display: flex;
@@ -131,7 +131,7 @@
   color: #1a0f2e;
 }
 
-/* ── status notes ── */
+/* -- status notes -- */
 
 .network-note {
   margin: 0.25rem 0;
@@ -169,7 +169,7 @@
   font: inherit;
 }
 
-/* ── tips ── */
+/* -- tips -- */
 
 .tips {
   margin: 0.5rem 0 0;
@@ -184,7 +184,7 @@
   margin-top: 0.3rem;
 }
 
-/* ── playing HUD ── */
+/* -- playing HUD -- */
 
 .playing-hud {
   position: absolute;
@@ -219,7 +219,7 @@
   background: currentColor;
 }
 
-/* ── arena (game view) ── */
+/* -- arena (game view) -- */
 
 .arena {
   position: fixed;

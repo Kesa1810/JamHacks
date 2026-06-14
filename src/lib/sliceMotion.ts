@@ -8,7 +8,7 @@ export type SliceTrackerState = {
   angVelY: number  // smoothed angular velocity deg/s on Y axis (up/down)
 }
 
-// Default fallback — overridden by adaptive profile at call site
+// Default fallback - overridden by adaptive profile at call site
 const DEFAULT_ANG_VEL_THRESHOLD = 90
 
 export function createSliceTracker(): SliceTrackerState {
@@ -40,7 +40,7 @@ export function enrichWithSlice(
   const rawVelX = (data.tiltX - state.prevTiltX) / dt
   const rawVelY = (data.tiltY - state.prevTiltY) / dt
 
-  // Light smoothing (0.4 new + 0.6 previous) — keeps it responsive
+  // Light smoothing (0.4 new + 0.6 previous) - keeps it responsive
   const angVelX = state.angVelX * 0.4 + rawVelX * 0.6
   const angVelY = state.angVelY * 0.4 + rawVelY * 0.6
 

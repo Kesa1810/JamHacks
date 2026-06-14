@@ -129,7 +129,7 @@ export function HostPage({ onExit }: HostPageProps) {
         <div className="playing-hud">
           <div className="status-pill online">
             <span className="status-dot" />
-            phone connected ✦
+            phone connected *
           </div>
         </div>
       )}
@@ -138,11 +138,11 @@ export function HostPage({ onExit }: HostPageProps) {
         <div className="connect-screen">
           {onExit && (
             <button type="button" className="back-btn" onClick={onExit}>
-              ← back
+              {'<- back'}
             </button>
           )}
 
-          <h1 className="connect-title">scan to play ✦</h1>
+          <h1 className="connect-title">scan to play *</h1>
           <p className="connect-sub">open on your phone to use it as the controller</p>
 
           <div className="qr-card">
@@ -150,7 +150,7 @@ export function HostPage({ onExit }: HostPageProps) {
               <QRCodeSVG value={qrUrl} size={200} level="M" includeMargin />
             ) : (
               <div className="qr-placeholder">
-                {network ? 'getting link…' : 'loading…'}
+                {network ? 'getting link...' : 'loading...'}
               </div>
             )}
           </div>
@@ -168,8 +168,8 @@ export function HostPage({ onExit }: HostPageProps) {
           ) : (
             <p className="network-note warn">
               {network?.tunnelPending
-                ? 'tunnel expired — fetching new link…'
-                : 'starting link… takes ~10 seconds'}
+                ? 'tunnel expired - fetching new link...'
+                : 'starting link... takes ~10 seconds'}
             </p>
           )}
 
@@ -193,7 +193,7 @@ export function HostPage({ onExit }: HostPageProps) {
           )}
 
           <ul className="tips">
-            <li>don't refresh this page — it'll reset the session</li>
+            <li>don't refresh this page - it'll reset the session</li>
             <li>on your phone, tap <strong>allow motion</strong> when it pops up</li>
             <li>swing your phone to move the saber!</li>
           </ul>

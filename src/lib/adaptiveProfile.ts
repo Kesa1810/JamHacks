@@ -1,5 +1,5 @@
 /**
- * Adaptive motion profile — learns each user's swing style over time and
+ * Adaptive motion profile - learns each user's swing style over time and
  * adjusts the detection threshold to match. Persists to localStorage so the
  * calibration carries across sessions.
  *
@@ -52,7 +52,7 @@ export function saveProfile(profile: MotionProfile): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(profile))
   } catch {
-    // storage not available — ignore
+    // storage not available - ignore
   }
 }
 
@@ -75,7 +75,7 @@ export function updateOnHit(profile: MotionProfile, speed: number): MotionProfil
 
 /**
  * Call this when the phone moved fast (swingSpeed > accel threshold) but no
- * swing was registered — the user probably tried to swing and we missed it.
+ * swing was registered - the user probably tried to swing and we missed it.
  */
 export function updateOnNearMiss(profile: MotionProfile): MotionProfile {
   const newThreshold = Math.max(MIN_THRESHOLD, profile.threshold - MISS_NUDGE)
@@ -94,7 +94,7 @@ export function resetProfile(): MotionProfile {
   return p
 }
 
-// ─── Server-side collective learning ─────────────────────────────────────────
+// --- Server-side collective learning -----------------------------------------
 
 type GlobalProfile = {
   recommendedThreshold: number | null
@@ -120,12 +120,12 @@ export async function blendGlobalProfile(local: MotionProfile): Promise<MotionPr
     const global: GlobalProfile = await res.json()
 
     if (!global.recommendedThreshold || global.dataPoints < MIN_CROWD_SESSIONS) {
-      return local  // not enough crowd data yet — stay local
+      return local  // not enough crowd data yet - stay local
     }
 
     // Blend: if user has no personal history, use crowd fully.
     // As they accumulate hits, their own calibration takes over.
-    const localWeight  = Math.min(1, local.hitCount / 20)   // 0→1 over 20 hits
+    const localWeight  = Math.min(1, local.hitCount / 20)   // 0->1 over 20 hits
     const crowdWeight  = 1 - localWeight
 
     const blendedThreshold =
@@ -142,7 +142,7 @@ export async function blendGlobalProfile(local: MotionProfile): Promise<MotionPr
       avgHitSpeed:  blendedSpeed,
     }
   } catch {
-    return local  // server unreachable — fall back to local
+    return local  // server unreachable - fall back to local
   }
 }
 
@@ -164,6 +164,6 @@ export async function submitSessionToServer(profile: MotionProfile): Promise<voi
       }),
     })
   } catch {
-    // non-fatal — just don't contribute this session
+    // non-fatal - just don't contribute this session
   }
 }

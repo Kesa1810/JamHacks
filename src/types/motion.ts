@@ -17,8 +17,8 @@ export type MotionData = {
   posX: number
   posY: number
   // Raw angle offsets from calibration baseline (degrees). Used for 1:1 saber tilt.
-  tiltX: number  // dGamma — positive = phone tilted right
-  tiltY: number  // -dBeta  — positive = phone tilted back/up
+  tiltX: number  // dGamma - positive = phone tilted right
+  tiltY: number  // -dBeta  - positive = phone tilted back/up
   swingSpeed: number
   timestamp: number
   velX: number
@@ -67,7 +67,7 @@ export function withPosition(
   const dBeta = beta - baseline.beta
   const dGamma = gamma - baseline.gamma
 
-  // tiltX/tiltY are raw degree offsets — used for 1:1 saber rotation
+  // tiltX/tiltY are raw degree offsets - used for 1:1 saber rotation
   const tiltX = dGamma           // + = phone tilted right
   const tiltY = -dBeta           // + = phone tilted back (up)
 
