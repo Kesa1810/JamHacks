@@ -97,9 +97,10 @@ function BottomRightSaber({ motion, lastSwingDir }: SaberProps) {
 // ─── Main game component ──────────────────────────────────────────────────────
 interface Props {
   motion: MotionData | null
+  controllerConnected?: boolean
 }
 
-export function RhythmGame({ motion }: Props) {
+export function RhythmGame({ motion, controllerConnected = false }: Props) {
   const [phase, setPhase]           = useState<'idle' | 'playing' | 'done'>('idle')
   const [beatmap, setBeatmap]       = useState<Beatmap | null>(null)
   const [activeNotes, setActiveNotes] = useState<ActiveNote[]>([])
@@ -365,7 +366,9 @@ export function RhythmGame({ motion }: Props) {
           <p className="rg-sub">
             {beatmap ? `${beatmap.notes.length} notes · ${beatmap.song}` : 'Loading beatmap…'}
           </p>
-          <p className="rg-hint">Arrow keys or swing your phone</p>
+          <p className="rg-hint">
+            {controllerConnected ? 'Arrow keys or swing your phone' : 'Scan QR to connect phone · or use arrow keys'}
+          </p>
           <button className="rg-start-btn" onClick={startGame} disabled={!beatmap}>
             ▶ Start Game
           </button>
