@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { MotionData, SliceDirection } from '../types/motion'
 import { createSliceTracker, enrichWithSlice } from '../lib/sliceMotion'
-<<<<<<< ours
 import {
   loadProfile,
   saveProfile,
@@ -12,9 +11,7 @@ import {
   submitSessionToServer,
   type MotionProfile,
 } from '../lib/adaptiveProfile'
-=======
 import type { GameSettings, RunStats } from '../App'
->>>>>>> theirs
 import './RhythmGame.css'
 
 // ─── Tunable constants ────────────────────────────────────────────────────────
