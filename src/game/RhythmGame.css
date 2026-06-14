@@ -4,7 +4,7 @@
   width: 100%;
   height: 100%;
   min-height: 500px;
-  background: #060812;
+  background: #060c05;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -21,16 +21,16 @@
   padding: 10px 24px;
   background: rgba(0,0,0,0.55);
   backdrop-filter: blur(6px);
-  border-bottom: 1px solid #1a1a2e;
+  border-bottom: 1px solid #1a2a18;
   z-index: 20;
 }
 .rg-stat { display: flex; flex-direction: column; align-items: center; gap: 1px; }
-.rg-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: #555; }
-.rg-stat-val   { font-size: 22px; font-weight: 700; color: #eee; }
-.rg-combo      { color: #c4aaff; }
-.rg-mult-1     { color: #eee; }
-.rg-mult-2     { color: #ffeb3b; }
-.rg-mult-4     { color: #ff4081; text-shadow: 0 0 12px #ff408188; }
+.rg-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: #4a5a40; }
+.rg-stat-val   { font-size: 22px; font-weight: 700; color: #d4c9a8; }
+.rg-combo      { color: #8fb87a; }
+.rg-mult-1     { color: #d4c9a8; }
+.rg-mult-2     { color: #d4b86a; }
+.rg-mult-4     { color: #e07050; text-shadow: 0 0 12px #e0705088; }
 
 /* -- Feedback flash -- */
 .rg-feedback {
@@ -45,8 +45,8 @@
   z-index: 25;
   animation: rg-pop .55s ease forwards;
 }
-.rg-feedback--hit  { color: #69f0ae; text-shadow: 0 0 24px #69f0ae; }
-.rg-feedback--miss { color: #ff5252; text-shadow: 0 0 24px #ff5252; }
+.rg-feedback--hit  { color: #8fb87a; text-shadow: 0 0 24px #8fb87a; }
+.rg-feedback--miss { color: #d06050; text-shadow: 0 0 24px #d06050; }
 @keyframes rg-pop {
   0%   { opacity: 1; transform: translateX(-50%) scale(1.25); }
   65%  { opacity: 1; transform: translateX(-50%) scale(1); }
@@ -62,24 +62,24 @@
   align-items: center;
   justify-content: center;
   gap: 18px;
-  background: rgba(6,8,18,.88);
+  background: rgba(6,12,5,.9);
   z-index: 30;
   overflow: hidden;
 }
 .rg-title {
   font-size: 52px;
   font-weight: 900;
-  color: #f0d6ff;
+  color: #c8d8a8;
   margin: 0;
   letter-spacing: .06em;
 }
-.rg-sub  { color: #777; font-size: 14px; text-align: center; max-width: 360px; }
-.rg-hint { color: #444; font-size: 13px; }
+.rg-sub  { color: #5a6a4a; font-size: 14px; text-align: center; max-width: 360px; }
+.rg-hint { color: #3a4a30; font-size: 13px; }
 .rg-start-btn {
   margin-top: 6px;
   padding: 14px 44px;
-  background: #c4aaff;
-  color: #110d1f;
+  background: #8fb87a;
+  color: #0b110a;
   border: none;
   border-radius: 999px;
   font-size: 18px;
@@ -88,20 +88,20 @@
   transition: transform .1s, background .1s;
   letter-spacing: .04em;
 }
-.rg-start-btn:hover   { transform: scale(1.05); background: #d8b4fe; }
+.rg-start-btn:hover   { transform: scale(1.05); background: #a8cc90; }
 .rg-start-btn:disabled { opacity: .4; cursor: not-allowed; }
 
-.rg-sens { color: #a78bfa; font-size: 18px; }
+.rg-sens { color: #8fb87a; font-size: 18px; }
 
 .rg-crowd-note {
   font-size: 12px;
-  color: #4a3870;
+  color: #3a4a30;
   margin: 0;
 }
 
 .rg-calibration-note {
   font-size: 12px;
-  color: #6b5a8a;
+  color: #4a5a3a;
   margin: 0;
   display: flex;
   align-items: center;
@@ -110,22 +110,22 @@
 
 .rg-reset-cal {
   background: none;
-  border: 1px solid #3d2d6e;
-  color: #6b5a8a;
+  border: 1px solid #2a3a22;
+  color: #4a5a3a;
   border-radius: 999px;
   padding: 2px 10px;
   font-size: 11px;
   cursor: pointer;
   transition: color .15s, border-color .15s;
 }
-.rg-reset-cal:hover { color: #c4aaff; border-color: #c4aaff; }
+.rg-reset-cal:hover { color: #8fb87a; border-color: #8fb87a; }
 
 .rg-results {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background: #0d0d1a;
-  border: 1px solid #1a1a2e;
+  background: #0d150b;
+  border: 1px solid #1a2a18;
   border-radius: 12px;
   padding: 22px 36px;
   min-width: 270px;
@@ -135,35 +135,32 @@
   justify-content: space-between;
   gap: 32px;
   font-size: 15px;
-  color: #888;
+  color: #6a7a5a;
 }
-.rg-results strong { color: #eee; font-size: 16px; }
+.rg-results strong { color: #d4c9a8; font-size: 16px; }
 
 /* -- Arena (playing) -- */
 .rg-arena {
   position: relative;
   flex: 1;
   overflow: hidden;
-  background: #0a0815;
+  background: #080d06;
 
-  /* Real CSS 3D — all children share this perspective */
   perspective: 520px;
-  /* Elevated focal point: horizon sits at ~18% from top so far blocks appear
-     near the top of the screen and close blocks appear at the bottom */
   perspective-origin: 50% 18%;
   transform-style: preserve-3d;
 }
 
-/* 3D grid floor — a flat plane receding into the distance */
+/* 3D grid floor */
 .rg-grid-floor {
   position: absolute;
   left: -50%;
   right: -50%;
-  top: 72%;          /* anchored at the hit zone */
+  top: 72%;
   height: 300%;
   background-image:
-    linear-gradient(rgba(196,170,255,.12) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(196,170,255,.12) 1px, transparent 1px);
+    linear-gradient(rgba(143,184,122,.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(143,184,122,.10) 1px, transparent 1px);
   background-size: 80px 80px;
   transform: rotateX(85deg);
   transform-origin: top center;
@@ -172,26 +169,26 @@
   pointer-events: none;
 }
 
-/* Lane guides — vertical lines that converge at the vanishing point */
+/* Lane guides */
 .rg-lane-guide {
   position: absolute;
   top: 0;
   bottom: 0;
   width: 1px;
-  background: rgba(196,170,255,.14);
+  background: rgba(143,184,122,.12);
   transform: translateX(-50%);
   pointer-events: none;
 }
 
-/* Hit zone — glowing line at the player's strike plane */
+/* Hit zone */
 .rg-hit-zone {
   position: absolute;
   top: 72%;
   left: 0;
   right: 0;
   height: 2px;
-  background: #c4aaff;
-  box-shadow: 0 0 18px #c4aaff, 0 0 40px #c4aaff55;
+  background: #8fb87a;
+  box-shadow: 0 0 18px #8fb87a, 0 0 40px #8fb87a55;
   opacity: .7;
   pointer-events: none;
   z-index: 5;
@@ -201,7 +198,6 @@
 .rg-block {
   pointer-events: none;
   will-change: transform;
-  /* Blocks live in the arena's 3D space */
   transform-style: preserve-3d;
 }
 
@@ -233,7 +229,6 @@
   height: 300px;
   transform-origin: bottom center;
   z-index: 15;
-  /* No transition — instant response eliminates visual lag */
   will-change: left, top;
 }
 
@@ -243,7 +238,6 @@
   height: 300px;
   transform-origin: bottom center;
   transform-style: preserve-3d;
-  /* No transition — matches phone in real time */
   will-change: transform;
 }
 
@@ -255,8 +249,8 @@
   height: 80px;
   margin-left: -13px;
   border-radius: 8px;
-  background: #3a3040;
-  box-shadow: inset 0 0 8px rgba(255,255,255,.1);
+  background: #2a3020;
+  box-shadow: inset 0 0 8px rgba(255,255,255,.08);
 }
 
 .rg-saber-guard {
@@ -267,8 +261,8 @@
   height: 9px;
   margin-left: -21px;
   border-radius: 4px;
-  background: #7a6a9a;
-  box-shadow: 0 0 6px #c4aaff55;
+  background: #5a7a4a;
+  box-shadow: 0 0 6px #8fb87a55;
 }
 
 .rg-saber-blade {
@@ -285,14 +279,14 @@
   width: 100%;
   height: 100%;
   border-radius: 999px 999px 4px 4px;
-  background: #d8b4fe;
+  background: #a8cc90;
   transition: box-shadow .06s;
 }
 
 .rg-blade-glow {
   position: absolute;
   inset: -10px -18px;
-  background: rgba(196,170,255,.35);
+  background: rgba(143,184,122,.30);
   filter: blur(10px);
   z-index: -1;
   pointer-events: none;

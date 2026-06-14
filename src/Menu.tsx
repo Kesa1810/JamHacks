@@ -18,8 +18,8 @@ const Menu: React.FC<MenuProps> = ({ onPlay }) => {
     left: `${5 + (index * 9) % 88}%`,
     size: 4 + (index % 4) * 2,
     delay: `${(index % 6) * 0.25}s`,
-    opacity: 0.35 + (index % 5) * 0.11,
-    tint: ['#fff7c8', '#b7f2ff', '#ffd9ef', '#c9ffdf'][index % 4],
+    opacity: 0.25 + (index % 5) * 0.08,
+    tint: ['#d4e8b0', '#c8d8a8', '#e8dcc8', '#b8c898'][index % 4],
   }));
 
   return (
@@ -41,7 +41,7 @@ const Menu: React.FC<MenuProps> = ({ onPlay }) => {
               height: sparkle.size,
               opacity: sparkle.opacity,
               animationDelay: sparkle.delay,
-              background: `linear-gradient(135deg, #ffffff, ${sparkle.tint})`,
+              background: `radial-gradient(circle, #e8f0d0, ${sparkle.tint})`,
             }}
           />
         ))}

@@ -1,5 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
 
+/* -- palette --
+   bg:        #0b110a  (deep forest night)
+   surface:   #111a0f
+   border:    #2a3a22
+   text:      #d4c9a8  (warm beige)
+   muted:     #7a8a6a  (mossy)
+   accent:    #8fb87a  (sage green)
+   bright:    #c8d8a8  (pale leaf)
+*/
+
 .menu-container {
   position: relative;
   min-height: 100vh;
@@ -7,14 +17,14 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 6vh 5vw;
+  padding: 6vh 7vw;
   box-sizing: border-box;
   overflow: hidden;
   font-family: 'Nunito', sans-serif;
-  background: #110d1f;
+  background: #0b110a;
 }
 
-/* floating dots */
+/* floating motes */
 .sparkle-layer {
   position: absolute;
   inset: 0;
@@ -25,34 +35,27 @@
 .sparkle {
   position: absolute;
   border-radius: 50%;
-  animation: sparkleFloat 4.8s ease-in-out infinite;
+  animation: sparkleFloat 5.2s ease-in-out infinite;
 }
 
 @keyframes sparkleFloat {
-  0%, 100% { transform: translateY(0) scale(0.9); opacity: 0.5; }
-  50% { transform: translateY(-10px) scale(1.1); opacity: 0.9; }
+  0%, 100% { transform: translateY(0) scale(0.9); opacity: 0.4; }
+  50% { transform: translateY(-12px) scale(1.15); opacity: 0.85; }
 }
 
-/* hide ambient orbs */
-.ambient-layer {
-  display: none;
-}
+.ambient-layer { display: none; }
 
-/* -- card -- */
+/* -- layout: no card, just content -- */
 
 .menu-card {
   position: relative;
   z-index: 1;
-  flex: 0 0 min(560px, 60vw);
-  max-width: 560px;
+  flex: 0 0 min(520px, 60vw);
+  max-width: 520px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 20px;
-  padding: 36px 32px 30px;
-  border-radius: 28px;
-  background: #1c1433;
-  border: 2px solid #3d2d6e;
+  gap: 24px;
 }
 
 /* -- title -- */
@@ -65,28 +68,28 @@
 .eyebrow {
   margin: 0;
   text-transform: lowercase;
-  letter-spacing: 0.05em;
-  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  font-size: 0.78rem;
   font-weight: 700;
-  color: #c4aaff;
+  color: #7a8a6a;
 }
 
 .game-title {
   margin: 0;
   font-family: 'Fredoka One', cursive;
-  font-size: clamp(2.4rem, 5vw, 3.4rem);
+  font-size: clamp(2.6rem, 5.5vw, 3.8rem);
   line-height: 1;
   letter-spacing: 0.02em;
-  color: #f0d6ff;
+  color: #c8d8a8;
 }
 
 .game-subtitle {
   margin: 0;
   max-width: 340px;
-  color: #9480b8;
-  font-size: 0.95rem;
+  color: #6a7a5a;
+  font-size: 0.92rem;
   font-weight: 600;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 /* -- buttons -- */
@@ -94,17 +97,18 @@
 .button-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0;
   width: 100%;
 }
 
 .menu-button {
+  position: relative;
   width: 100%;
-  padding: 10px 0;
+  padding: 10px 0 10px 16px;
   background: transparent;
   border: none;
   border-radius: 0;
-  color: #e8d5ff;
+  color: #a0aa88;
   font-family: 'Nunito', sans-serif;
   font-size: 1.05rem;
   font-weight: 700;
@@ -112,22 +116,44 @@
   text-align: left;
   cursor: pointer;
   letter-spacing: 0.01em;
-  transition: color 0.15s, transform 0.15s;
+  transition: color 0.2s, letter-spacing 0.2s;
+  /* left accent bar */
+  border-left: 2px solid transparent;
+}
+
+/* the left bar slides in and text brightens — no background fill */
+.menu-button::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 2px;
+  background: #8fb87a;
+  border-radius: 2px;
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform 0.18s ease;
 }
 
 .menu-button:hover,
 .menu-button:focus-visible {
-  color: #f7d6ff;
-  transform: translateX(6px);
+  color: #c8d8a8;
+  letter-spacing: 0.04em;
   outline: none;
+}
+
+.menu-button:hover::before,
+.menu-button:focus-visible::before {
+  transform: scaleY(1);
 }
 
 /* -- footer -- */
 
 .menu-footer {
   margin-top: 4px;
-  color: #4a3870;
-  font-size: 0.82rem;
+  color: #3a4a30;
+  font-size: 0.8rem;
 }
 
 /* -- responsive -- */
@@ -145,11 +171,6 @@
 
 @media (max-width: 500px) {
   .menu-container {
-    padding: 4vh 5vw;
-  }
-
-  .menu-card {
-    padding: 24px 20px 20px;
-    border-radius: 20px;
+    padding: 4vh 6vw;
   }
 }

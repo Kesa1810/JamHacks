@@ -3,8 +3,8 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color: #e8d5ff;
-  background: #110d1f;
+  color: #d4c9a8;
+  background: #0b110a;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -25,8 +25,8 @@ body,
 
 body {
   min-height: 100vh;
-  background: #110d1f;
-  color: #e8d5ff;
+  background: #0b110a;
+  color: #d4c9a8;
 }
 
 /* Keep this only for fullscreen game mode (safe, not visual) */
@@ -43,21 +43,21 @@ html.sabersync-playing #root {
 button {
   font: inherit;
   cursor: pointer;
-  background: #1c1433;
-  color: #e8d5ff;
-  border: 1.5px solid #3d2d6e;
+  background: #111a0f;
+  color: #d4c9a8;
+  border: 1.5px solid #2a3a22;
   border-radius: 999px;
   padding: 10px 18px;
   transition: background 0.15s ease, color 0.15s ease;
 }
 
 button:hover {
-  background: #c4aaff;
-  color: #110d1f;
+  background: #8fb87a;
+  color: #0b110a;
 }
 
 a {
-  color: #c4aaff;
+  color: #8fb87a;
   text-decoration: none;
 }
 

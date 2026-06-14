@@ -29,8 +29,8 @@
 .back-btn {
   align-self: flex-start;
   background: none;
-  border: 1.5px solid #c9b8f0;
-  color: #c9b8f0;
+  border: 1.5px solid #7a8a6a;
+  color: #7a8a6a;
   padding: 0.3rem 0.85rem;
   border-radius: 999px;
   cursor: pointer;
@@ -39,21 +39,21 @@
   transition: background 0.15s, color 0.15s;
 }
 .back-btn:hover {
-  background: #c9b8f0;
-  color: #1a0f2e;
+  background: #7a8a6a;
+  color: #0b110a;
 }
 
 .connect-title {
   margin: 0;
   font-size: 2rem;
   font-weight: 800;
-  color: #f7d6ff;
+  color: #c8d8a8;
   letter-spacing: 0.04em;
 }
 
 .connect-sub {
   margin: 0 0 0.75rem;
-  color: #b8a8d0;
+  color: #8a9a7a;
   font-size: 0.95rem;
 }
 
@@ -66,7 +66,7 @@
   background: #fff;
   border-radius: 1.25rem;
   margin: 0.5rem 0;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35);
 }
 
 .qr-placeholder {
@@ -85,7 +85,7 @@
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: #9480b8;
+  color: #6a7a5a;
 }
 
 .session-id {
@@ -93,7 +93,7 @@
   font-size: 1.6rem;
   font-weight: 800;
   letter-spacing: 0.22em;
-  color: #e8d5ff;
+  color: #d4c9a8;
 }
 
 /* -- link row -- */
@@ -110,25 +110,25 @@
   flex: 1;
   font-size: 0.75rem;
   word-break: break-all;
-  color: #c4aaff;
+  color: #8fb87a;
   text-align: left;
 }
 
 .copy-btn {
   flex-shrink: 0;
   padding: 0.4rem 0.85rem;
-  border: 1.5px solid #c4aaff;
+  border: 1.5px solid #8fb87a;
   border-radius: 999px;
   background: none;
-  color: #c4aaff;
+  color: #8fb87a;
   font-weight: 700;
   font-size: 0.8rem;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 .copy-btn:hover {
-  background: #c4aaff;
-  color: #1a0f2e;
+  background: #8fb87a;
+  color: #0b110a;
 }
 
 /* -- status notes -- */
@@ -140,12 +140,12 @@
 }
 
 .network-note.warn {
-  color: #ffcc80;
+  color: #d4a96a;
 }
 
 .local-url-note {
   font-size: 0.75rem;
-  color: #9480b8;
+  color: #6a7a5a;
   word-break: break-all;
   margin: 0.25rem 0;
 }
@@ -155,7 +155,7 @@
   flex-direction: column;
   gap: 0.3rem;
   font-size: 0.82rem;
-  color: #9480b8;
+  color: #6a7a5a;
   width: 100%;
   margin: 0.25rem 0;
 }
@@ -163,9 +163,9 @@
 .ip-picker select {
   padding: 0.45rem;
   border-radius: 0.5rem;
-  border: 1px solid #4a3870;
-  background: #1e1438;
-  color: #e8d5ff;
+  border: 1px solid #2a3a22;
+  background: #111a0f;
+  color: #d4c9a8;
   font: inherit;
 }
 
@@ -174,7 +174,7 @@
 .tips {
   margin: 0.5rem 0 0;
   padding-left: 1.1rem;
-  color: #9480b8;
+  color: #6a7a5a;
   font-size: 0.88rem;
   text-align: left;
   width: 100%;
@@ -199,9 +199,9 @@
   gap: 0.5rem;
   padding: 0.45rem 0.9rem;
   border-radius: 999px;
-  background: #1e1438;
-  border: 1.5px solid #4a3870;
-  color: #b8a8d0;
+  background: #111a0f;
+  border: 1.5px solid #2a3a22;
+  color: #8a9a7a;
   font-size: 0.85rem;
   white-space: nowrap;
 }
