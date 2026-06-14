@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { useSocket } from '../hooks/useSocket'
 import { createSessionId } from '../lib/session'
-import type { MotionData, NetworkInfo } from '../types/motion'
+import type { NetworkInfo } from '../types/motion'
 import { RhythmGame } from '../game/RhythmGame'
 import './HostPage.css'
 
@@ -16,7 +16,6 @@ export function HostPage({ onExit }: HostPageProps) {
   const [selectedIp, setSelectedIp] = useState('')
   const [copied, setCopied] = useState(false)
   const [controllerConnected, setControllerConnected] = useState(false)
-  const [motion, setMotion] = useState<MotionData | null>(null)
   const { socketRef, connected: socketConnected } = useSocket(sessionId, 'host')
 
   const usableAddresses = useMemo(
@@ -77,11 +76,9 @@ export function HostPage({ onExit }: HostPageProps) {
     const socket = socketRef.current
     if (!socket || !socketConnected) return
 
-    const onMotion = (data: MotionData) => setMotion(data)
     const onConnected = () => setControllerConnected(true)
     const onDisconnected = () => {
       setControllerConnected(false)
-      setMotion(null)
     }
     const onTunnelReady = ({ tunnelUrl: url }: { tunnelUrl: string }) => {
       setNetwork((current) =>
@@ -94,14 +91,12 @@ export function HostPage({ onExit }: HostPageProps) {
       )
     }
 
-    socket.on('motion', onMotion)
     socket.on('controller-connected', onConnected)
     socket.on('controller-disconnected', onDisconnected)
     socket.on('tunnel-ready', onTunnelReady)
     socket.on('tunnel-lost', onTunnelLost)
 
     return () => {
-      socket.off('motion', onMotion)
       socket.off('controller-connected', onConnected)
       socket.off('controller-disconnected', onDisconnected)
       socket.off('tunnel-ready', onTunnelReady)
@@ -202,7 +197,7 @@ export function HostPage({ onExit }: HostPageProps) {
 
       {controllerConnected && (
         <main className="arena">
-          <RhythmGame motion={motion} />
+          <RhythmGame socketRef={socketRef} connected={socketConnected} />
         </main>
       )}
     </div>

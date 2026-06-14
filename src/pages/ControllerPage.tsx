@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { MotionPermissionModal } from '../components/MotionPermissionModal'
 import { MotionSettingsHelp } from '../components/MotionSettingsHelp'
@@ -9,6 +9,7 @@ import {
 } from '../lib/deviceMotion'
 import { useSocket } from '../hooks/useSocket'
 import { useMotionStream } from '../hooks/useMotionStream'
+import { useWakeLock } from '../hooks/useWakeLock'
 import './ControllerPage.css'
 
 export function ControllerPage() {
@@ -27,6 +28,54 @@ export function ControllerPage() {
     connected,
     socketRef,
   })
+
+  // Keep the phone screen on during gameplay so it never locks + disconnects.
+  const wakeLockActive = useWakeLock(motionActive)
+
+  // Stop the phone from reloading/closing this tab — pull-to-refresh, overscroll,
+  // and accidental back/close all reset the session mid-game.
+  useEffect(() => {
+    const root = document.documentElement
+    const prevHtml = root.style.overscrollBehavior
+    const prevBody = document.body.style.overscrollBehavior
+    root.style.overscrollBehavior = 'none'
+    document.body.style.overscrollBehavior = 'none'
+    return () => {
+      root.style.overscrollBehavior = prevHtml
+      document.body.style.overscrollBehavior = prevBody
+    }
+  }, [])
+
+  // While actively controlling, warn before an accidental unload/close so a
+  // stray swipe or tap can't silently kill the live session.
+  useEffect(() => {
+    if (!motionActive) return
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [motionActive])
+
+  // Haptic feedback — host emits 'haptic' after a hit, we vibrate the phone.
+  // Silent-fail: navigator.vibrate is undefined on iOS and some browsers.
+  useEffect(() => {
+    const socket = socketRef.current
+    if (!socket) return
+    const onHaptic = ({ type }: { type: string }) => {
+      try {
+        if (!navigator.vibrate) return
+        if (type === 'perfect') {
+          navigator.vibrate([80, 40, 80])
+        } else {
+          navigator.vibrate(60)
+        }
+      } catch {}
+    }
+    socket.on('haptic', onHaptic)
+    return () => { socket.off('haptic', onHaptic) }
+  }, [socketRef, connected])
 
   const startMotion = async () => {
     setErrorKind(null)
@@ -120,6 +169,9 @@ export function ControllerPage() {
             <p className="hint-label">
               No sensor data yet - tap Motion settings and allow access.
             </p>
+          )}
+          {wakeLockActive && (
+            <p className="wakelock-label">Screen stay-awake: ON</p>
           )}
         </div>
       )}

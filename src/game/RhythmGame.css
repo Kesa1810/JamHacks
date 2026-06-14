@@ -180,6 +180,64 @@
   pointer-events: none;
 }
 
+/* 3-lane indicator columns — glow on the lane the player is currently in */
+.rg-lane-col {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 130px;
+  transform: translateX(-50%);
+  border-left: 1px solid rgba(143,184,122,.10);
+  border-right: 1px solid rgba(143,184,122,.10);
+  background: linear-gradient(rgba(143,184,122,.02), rgba(143,184,122,.06));
+  pointer-events: none;
+  transition: background .12s ease, box-shadow .12s ease;
+  z-index: 1;
+}
+.rg-lane-col--active {
+  background: linear-gradient(rgba(196,170,255,.06), rgba(196,170,255,.22));
+  border-left: 1px solid rgba(196,170,255,.6);
+  border-right: 1px solid rgba(196,170,255,.6);
+  box-shadow: inset 0 0 36px rgba(196,170,255,.28), 0 0 24px rgba(196,170,255,.18);
+}
+
+/* -- Calibration screen -- */
+.rg-cal-step {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  color: #8fb87a;
+  margin: 0;
+}
+.rg-cal-arrow {
+  font-size: 84px;
+  line-height: 1;
+  color: #c4aaff;
+  text-shadow: 0 0 28px rgba(196,170,255,.6);
+}
+.rg-cal-instruction {
+  font-size: 24px;
+  font-weight: 800;
+  color: #d4c9a8;
+  text-align: center;
+  max-width: 380px;
+  margin: 0;
+}
+.rg-cal-bar {
+  width: 260px;
+  height: 10px;
+  border-radius: 999px;
+  background: #11210f;
+  border: 1px solid #1a2a18;
+  overflow: hidden;
+}
+.rg-cal-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8fb87a, #c4aaff);
+  box-shadow: 0 0 12px rgba(196,170,255,.5);
+  transition: width .08s linear;
+}
+
 /* Hit zone */
 .rg-hit-zone {
   position: absolute;
@@ -219,6 +277,117 @@
   100% { opacity: 0; filter: grayscale(1) brightness(.25); }
 }
 
+/* -- Pause overlay + popup -- */
+.rg-pause-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 8, 4, 0.72);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.rg-pause-popup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background: #0d1a0b;
+  border: 1px solid #2a3a22;
+  border-radius: 18px;
+  padding: 28px 36px 24px;
+  min-width: 220px;
+  box-shadow: 0 0 48px rgba(196,170,255,.18), 0 8px 32px rgba(0,0,0,.6);
+}
+
+.rg-pause-title {
+  margin: 0 0 4px;
+  font-size: 13px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: #4a5a3a;
+}
+
+.rg-pause-btn {
+  width: 100%;
+  padding: 11px 0;
+  border: 1px solid #2a3a22;
+  border-radius: 10px;
+  background: #111a0f;
+  color: #c8d8a8;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: .04em;
+  transition: background .12s, border-color .12s, color .12s;
+}
+.rg-pause-btn:hover {
+  background: #1a2a16;
+  border-color: #8fb87a;
+  color: #e0f0c0;
+}
+.rg-pause-btn--danger {
+  color: #805040;
+  border-color: #2a1a14;
+}
+.rg-pause-btn--danger:hover {
+  background: #1a0d0a;
+  border-color: #c06040;
+  color: #e08060;
+}
+
+.rg-pause-back {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: #4a5a3a;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: -4px;
+  transition: color .12s;
+}
+.rg-pause-back:hover { color: #8fb87a; }
+
+/* Settings sliders inside pause menu */
+.rg-slider-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+.rg-slider-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.rg-slider-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: #8fb87a;
+}
+.rg-slider-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: #c4aaff;
+}
+.rg-slider-hints {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #3a4a30;
+  letter-spacing: .06em;
+}
+.rg-slider {
+  width: 100%;
+  accent-color: #8fb87a;
+  cursor: pointer;
+}
+
 /* -- Free-moving saber -- */
 .rg-saber-anchor {
   position: absolute;
@@ -239,6 +408,15 @@
   transform-origin: bottom center;
   transform-style: preserve-3d;
   will-change: transform;
+}
+
+/* SWINGING state: brief bright flash + motion blur (toggled imperatively). */
+.rg-saber-rig--swinging .rg-blade-glow {
+  background: rgba(196,170,255,.55);
+  filter: blur(16px);
+}
+.rg-saber-rig--swinging .rg-blade-core {
+  filter: brightness(1.6);
 }
 
 .rg-saber-handle {

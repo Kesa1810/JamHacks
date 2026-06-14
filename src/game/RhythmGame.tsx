@@ -1,152 +1,216 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { MotionData, SliceDirection } from '../types/motion'
-import { createSliceTracker, enrichWithSlice } from '../lib/sliceMotion'
+import type { Socket } from 'socket.io-client'
+import type { MotionData } from '../types/motion'
 import {
-  loadProfile,
-  saveProfile,
-  resetProfile,
-  updateOnHit,
-  updateOnNearMiss,
-  blendGlobalProfile,
-  submitSessionToServer,
-  type MotionProfile,
-} from '../lib/adaptiveProfile'
+  createSimpleSwingDetector,
+  detectSwing,
+  createGammaSmoother,
+  createStabilityTracker,
+  pushStability,
+  makeCalibration,
+  laneFromGamma,
+  SWING_THRESHOLD,
+  type LaneCalibration,
+} from '../lib/sliceMotion'
 import './RhythmGame.css'
 
-// --- Tunable constants --------------------------------------------------------
-const LEAD_TIME       = 2.6   // seconds a block is visible before its hit time
-const HIT_WINDOW      = 0.35  // +/- seconds that count as a hit
-const PERFECT_WINDOW  = 0.09  // tighter perfect window
-const BASE_POINTS     = 100
-const SWING_ARM_POWER = 0.4   // slicePower above this fires a swing
-const SWING_RESET_POW = 0.1   // must drop below this to re-arm
+// --- Tunable defaults (runtime-adjustable via settings sliders) ---------------
+const LEAD_TIME_DEFAULT   = 2.6   // seconds a block is visible before its hit time
+const HIT_WINDOW_DEFAULT  = 0.35  // +/- seconds that count as a hit
+const PERFECT_WINDOW      = 0.09  // tighter perfect window
+const BASE_POINTS         = 100
 
-// Lane X positions (% of arena width, 3 lanes)
-const LANE_X = [22, 50, 78]
+const SABER_LERP_SPEED = 0.15
+const SWING_FLASH_MS   = 200
+const HIT_DEFER_MS     = 0
 
-type NoteDir = 'left' | 'right' | 'up' | 'down'
+// 3 lanes: 0 = LEFT, 1 = CENTER, 2 = RIGHT
+const LANE_X     = [28, 50, 72]
+const LANE_LABEL = ['LEFT', 'CENTER', 'RIGHT']
+
+// Block depth path (true CSS 3D perspective, per lane).
+const Z_SPAWN = -1400
+const Z_HIT   =  120
 
 interface BeatmapNote {
   time: number
-  lane: number
-  direction: NoteDir
+  lane?: number
+  direction?: string
 }
 interface Beatmap {
   song: string
   laneCount: number
   notes: BeatmapNote[]
 }
-interface ActiveNote extends BeatmapNote {
+interface ActiveNote {
+  time: number
+  lane: number
   id: number
   hit: boolean
   missed: boolean
   exploding: boolean
 }
 
-const DIR_ARROW: Record<NoteDir, string> = {
-  left: '<-', right: '->', up: '^', down: 'v',
-}
-
-// Block colour per direction
-const DIR_COLOR: Record<NoteDir, { border: string; bg: string; glow: string }> = {
-  left:  { border: '#ce93d8', bg: '#1a0030', glow: '#ce93d888' },
-  right: { border: '#80d8ff', bg: '#001a30', glow: '#80d8ff88' },
-  up:    { border: '#b9f6ca', bg: '#0a2000', glow: '#b9f6ca88' },
-  down:  { border: '#ffcc80', bg: '#2a1000', glow: '#ffcc8088' },
-}
+const NEON = { border: '#c4aaff', bg: '#1a0030', glow: '#c4aaff88' }
 
 let noteIdCounter = 0
 
-// --- Saber - free-moving, tracks phone position AND orientation ---------------
-interface SaberProps {
-  motion: MotionData | null
-  lastSwingDir: NoteDir | null
+const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v))
+
+interface SaberState {
+  tiltX: number
+  tiltY: number
+  speed: number
 }
 
-function FreeSaber({ motion, lastSwingDir }: SaberProps) {
-  const tiltX = motion?.tiltX ?? 0   // dGamma: right tilt = positive
-  const tiltY = motion?.tiltY ?? 0   // -dBeta: upward tilt = positive
-  const speed = motion?.swingSpeed ?? 0
-  const glow  = 24 + Math.min(speed * 8, 50)
+// --- Calibration screen -------------------------------------------------------
+interface CalibrationProps {
+  motionRef: React.RefObject<MotionData | null>
+  onComplete: (cal: LaneCalibration) => void
+}
 
-  // -- Screen position --------------------------------------------------------
-  // Map phone tilt angles to % position on screen.
-  // Horizontal: tiltX +/-60 deg -> 20% - 80% of width
-  // Vertical:   tiltY +/-45 deg -> 30% - 85% of height (inverted: tilt up -> saber moves up)
-  const clampedX = Math.max(-60, Math.min(60, tiltX))
-  const clampedY = Math.max(-45, Math.min(45, tiltY))
-  const screenLeft = 50 + clampedX * (30 / 60)          // 20-80%
-  const screenTop  = 70 - clampedY * (35 / 45)          // 35-85% (up = lower % = higher on page)
+const CAL_STEPS = [
+  { key: 'left',   label: 'LEFT lane',   instruction: 'Tilt your phone to the LEFT and hold still', arrow: '⟵' },
+  { key: 'center', label: 'CENTER lane', instruction: 'Hold your phone straight ahead (center)',     arrow: '•'  },
+  { key: 'right',  label: 'RIGHT lane',  instruction: 'Tilt your phone to the RIGHT and hold still',  arrow: '⟶' },
+] as const
 
-  // -- Rotation ---------------------------------------------------------------
-  // Saber rotates to match phone angle - 1:1 with tilt
-  const baseRotZ = Math.max(-75, Math.min(75, tiltX))
-  const baseRotX = Math.max(-45, Math.min(45, tiltY * 0.5))
+function CalibrationScreen({ motionRef, onComplete }: CalibrationProps) {
+  const [step, setStep]         = useState(0)
+  const [progress, setProgress] = useState(0)
+  const [ready, setReady]       = useState(false)
+  const [noSignal, setNoSignal] = useState(true)
+  const trackerRef  = useRef(createStabilityTracker())
+  const capturedRef = useRef<number[]>([])
+  const calRef      = useRef<LaneCalibration | null>(null)
+  const readyRef    = useRef(false)
 
-  // On swing: snap to dramatic angle
-  const swingRotZ = lastSwingDir === 'left'  ? -70
-                  : lastSwingDir === 'right' ?  70
-                  : 0
-  const swingRotX = lastSwingDir === 'up'   ? -55
-                  : lastSwingDir === 'down' ?  55
-                  : 0
+  useEffect(() => {
+    let raf = 0
+    const loop = () => {
+      raf = requestAnimationFrame(loop)
+      if (readyRef.current) return
 
-  const finalRotZ = lastSwingDir ? swingRotZ : baseRotZ
-  const finalRotX = lastSwingDir ? swingRotX : baseRotX
+      const m = motionRef.current
+      if (!m || m.gamma == null) {
+        setNoSignal(true)
+        return
+      }
+      setNoSignal(false)
+
+      const now = m.timestamp || Date.now()
+      const { angle, progress: p } = pushStability(trackerRef.current, m.gamma, now)
+      setProgress(p)
+      if (angle == null) return
+
+      capturedRef.current = [...capturedRef.current, angle]
+      trackerRef.current = createStabilityTracker()
+      setProgress(0)
+
+      if (capturedRef.current.length >= 3) {
+        const [l, c, r] = capturedRef.current
+        calRef.current = makeCalibration(l, c, r)
+        readyRef.current = true
+        setReady(true)
+      } else {
+        setStep(capturedRef.current.length)
+      }
+    }
+    raf = requestAnimationFrame(loop)
+    return () => cancelAnimationFrame(raf)
+  }, [motionRef])
+
+  const cur = CAL_STEPS[step]
 
   return (
-    <div
-      className="rg-saber-anchor"
-      style={{ left: `${screenLeft}%`, top: `${screenTop}%` }}
-    >
-      <div
-        className="rg-saber-rig"
-        style={{ transform: `rotateZ(${finalRotZ}deg) rotateX(${finalRotX}deg)` }}
-      >
-        <div className="rg-saber-blade">
-          <div className="rg-blade-core" style={{ boxShadow: `0 0 ${glow}px #c4aaff` }} />
-          <div className="rg-blade-glow" />
-        </div>
-        <div className="rg-saber-guard" />
-        <div className="rg-saber-handle" />
-      </div>
+    <div className="rg-overlay">
+      <div className="rg-grid-floor" />
+      {!ready ? (
+        <>
+          <p className="rg-cal-step">Step {step + 1} of 3 — {cur.label}</p>
+          <div className="rg-cal-arrow">{cur.arrow}</div>
+          <h2 className="rg-cal-instruction">{cur.instruction}</h2>
+          <div className="rg-cal-bar">
+            <div className="rg-cal-bar-fill" style={{ width: `${Math.round(progress * 100)}%` }} />
+          </div>
+          <p className="rg-hint">
+            {noSignal ? 'waiting for phone motion…' : 'hold steady to lock it in'}
+          </p>
+        </>
+      ) : (
+        <>
+          <h2 className="rg-title">Calibration done!</h2>
+          <p className="rg-sub">You're ready. Tilt to move between lanes, swing to hit.</p>
+          <button
+            className="rg-start-btn"
+            onClick={() => calRef.current && onComplete(calRef.current)}
+          >
+            {'> Start Game'}
+          </button>
+        </>
+      )}
     </div>
   )
 }
 
 // --- Main game component ------------------------------------------------------
 interface Props {
-  motion: MotionData | null
+  socketRef: React.RefObject<Socket | null>
+  connected: boolean
 }
 
-export function RhythmGame({ motion }: Props) {
-  const [phase, setPhase]           = useState<'idle' | 'playing' | 'done'>('idle')
-  const [beatmap, setBeatmap]       = useState<Beatmap | null>(null)
+export function RhythmGame({ socketRef, connected }: Props) {
+  const [phase, setPhase]             = useState<'idle' | 'calibrating' | 'playing' | 'done'>('idle')
+  const [beatmap, setBeatmap]         = useState<Beatmap | null>(null)
   const [activeNotes, setActiveNotes] = useState<ActiveNote[]>([])
-  const [score, setScore]           = useState(0)
-  const [combo, setCombo]           = useState(0)
-  const [hits, setHits]             = useState(0)
-  const [misses, setMisses]         = useState(0)
-  const [multiplier, setMultiplier] = useState(1)
-  const [audioTime, setAudioTime]   = useState(0)
-  const [feedback, setFeedback]     = useState<{ text: string; ok: boolean } | null>(null)
-  const [lastSwingDir, setLastSwingDir] = useState<NoteDir | null>(null)
-  const [profile, setProfile]       = useState<MotionProfile>(loadProfile)
+  const [score, setScore]             = useState(0)
+  const [combo, setCombo]             = useState(0)
+  const [hits, setHits]               = useState(0)
+  const [misses, setMisses]           = useState(0)
+  const [multiplier, setMultiplier]   = useState(1)
+  const [feedback, setFeedback]       = useState<{ text: string; ok: boolean } | null>(null)
+  const [currentLane, setCurrentLane] = useState(1)
+
+  // Settings — refs so changes take effect immediately every frame
+  const [leadTime, setLeadTime]     = useState(LEAD_TIME_DEFAULT)
+  const [hitWindow, setHitWindow]   = useState(HIT_WINDOW_DEFAULT)
+  const leadTimeRef  = useRef(LEAD_TIME_DEFAULT)
+  const hitWindowRef = useRef(HIT_WINDOW_DEFAULT)
+
+  // Pause state
+  const [paused, setPaused]         = useState(false)
+  const [pausePanel, setPausePanel] = useState<'menu' | 'settings'>('menu')
+  const pausedRef     = useRef(false)
+  const pausePanelRef = useRef<'menu' | 'settings'>('menu')
 
   const audioRef          = useRef<HTMLAudioElement | null>(null)
   const nextNoteIndexRef  = useRef(0)
   const rafRef            = useRef<number>(0)
-  const swingArmedRef     = useRef(true)
-  const sliceStateRef     = useRef(createSliceTracker())
+  const swingDetectorRef  = useRef(createSimpleSwingDetector())
+  const gammaSmootherRef  = useRef(createGammaSmoother())
   const comboRef          = useRef(0)
   const multRef           = useRef(1)
   const activeNotesRef    = useRef<ActiveNote[]>([])
-  const profileRef        = useRef<MotionProfile>(profile)
-  profileRef.current = profile
+  const calibrationRef    = useRef<LaneCalibration | null>(null)
+  const currentLaneRef    = useRef(1)
+  const phaseRef          = useRef(phase)
+  const audioTimeRef      = useRef(0)
 
-  comboRef.current = combo
-  multRef.current  = multiplier
+  const latestMotionRef    = useRef<MotionData | null>(null)
+  const saberStateRef      = useRef<SaberState>({ tiltX: 0, tiltY: 0, speed: 0 })
+  const swingFlashUntilRef = useRef(0)
+  const saberAnchorRef     = useRef<HTMLDivElement | null>(null)
+  const saberRigRef        = useRef<HTMLDivElement | null>(null)
+  const saberCoreRef       = useRef<HTMLDivElement | null>(null)
+  const blockRefs          = useRef<Map<number, HTMLDivElement>>(new Map())
+
+  // Keep refs in sync with state (read by event handlers / RAF without re-subscribing)
+  comboRef.current      = combo
+  multRef.current       = multiplier
   activeNotesRef.current = activeNotes
+  phaseRef.current      = phase
+  pausedRef.current     = paused
+  pausePanelRef.current = pausePanel
 
   useEffect(() => {
     fetch('/beatmap.json')
@@ -155,157 +219,231 @@ export function RhythmGame({ motion }: Props) {
       .catch(() => console.error('Could not load /beatmap.json'))
   }, [])
 
-  // Blend crowd-sourced global profile into local on mount
-  useEffect(() => {
-    blendGlobalProfile(profileRef.current).then((blended) => {
-      setProfile(blended)
-    })
-  }, [])
-
   const showFeedback = useCallback((text: string, ok: boolean) => {
     setFeedback({ text, ok })
     setTimeout(() => setFeedback(null), 600)
   }, [])
 
-  // -- Hit handler ------------------------------------------------------------
-  const handleSwing = useCallback((direction: NoteDir) => {
+  // -- Hit decision: runs IMMEDIATELY on swing ----------------------------------
+  const processSwing = useCallback(() => {
     const audio = audioRef.current
-    if (!audio || phase !== 'playing') return
+    if (!audio || phaseRef.current !== 'playing') return
 
-    // Visual saber swing
-    setLastSwingDir(direction)
-    setTimeout(() => setLastSwingDir(null), 250)
+    swingFlashUntilRef.current = performance.now() + SWING_FLASH_MS
 
     const now = audio.currentTime
+    const playerLane = currentLaneRef.current
 
-    setActiveNotes((prev) => {
-      let bestIdx = -1
-      let bestDist = Infinity
-      prev.forEach((n, i) => {
-        if (n.hit || n.missed) return
-        const dist = Math.abs(n.time - now)
-        if (dist <= HIT_WINDOW && n.direction === direction && dist < bestDist) {
-          bestDist = dist
-          bestIdx = i
-        }
-      })
-
-      if (bestIdx === -1) {
-        setCombo(0); setMisses((m) => m + 1); setMultiplier(1)
-        showFeedback('Miss', false)
-        return prev
+    let bestIdx = -1
+    let bestDist = Infinity
+    const notes = activeNotesRef.current
+    for (let i = 0; i < notes.length; i++) {
+      const n = notes[i]
+      if (n.hit || n.missed) continue
+      if (n.lane !== playerLane) continue
+      const dist = Math.abs(n.time - now)
+      if (dist <= hitWindowRef.current && dist < bestDist) {
+        bestDist = dist
+        bestIdx = i
       }
+    }
 
-      const perfect = bestDist <= PERFECT_WINDOW
-      const newCombo = comboRef.current + 1
-      const newMult  = newCombo >= 8 ? 4 : newCombo >= 4 ? 2 : 1
-      setCombo(newCombo); setMultiplier(newMult)
-      setScore((s) => s + BASE_POINTS * newMult)
-      setHits((h) => h + 1)
+    if (bestIdx === -1) {
+      setCombo(0); setMisses((m) => m + 1); setMultiplier(1)
+      showFeedback('Miss', false)
+      return
+    }
+
+    const perfect = bestDist <= PERFECT_WINDOW
+    const newCombo = comboRef.current + 1
+    const newMult  = newCombo >= 8 ? 4 : newCombo >= 4 ? 2 : 1
+    comboRef.current = newCombo
+    multRef.current = newMult
+    const hitId = notes[bestIdx].id
+    notes[bestIdx].hit = true
+
+    setCombo(newCombo); setMultiplier(newMult)
+    setScore((s) => s + BASE_POINTS * newMult)
+    setHits((h) => h + 1)
+
+    // Haptic feedback to controller
+    try {
+      socketRef.current?.emit('haptic', { type: perfect ? 'perfect' : 'hit' })
+    } catch {}
+
+    setTimeout(() => {
       showFeedback(perfect ? 'Perfect!' : 'Hit!', true)
-
-      const updated = prev.map((n, i) =>
-        i === bestIdx ? { ...n, hit: true, exploding: true } : n,
+      setActiveNotes((cur) =>
+        cur.map((n) => (n.id === hitId ? { ...n, hit: true, exploding: true } : n)),
       )
-      const hitId = updated[bestIdx].id
       setTimeout(() => setActiveNotes((cur) => cur.filter((n) => n.id !== hitId)), 350)
-      return updated
-    })
-  }, [phase, showFeedback])
+    }, HIT_DEFER_MS)
+  }, [showFeedback, socketRef])
 
-  // -- Keyboard fallback ------------------------------------------------------
+  // -- Socket motion: store + immediate swing detection ------------------------
+  useEffect(() => {
+    const socket = socketRef.current
+    if (!socket) return
+
+    const onMotion = (data: MotionData) => {
+      latestMotionRef.current = data
+      if (phaseRef.current !== 'playing' || pausedRef.current) return
+      const { swing } = detectSwing(data, swingDetectorRef.current, SWING_THRESHOLD)
+      if (swing) processSwing()
+    }
+
+    socket.on('motion', onMotion)
+    return () => { socket.off('motion', onMotion) }
+  }, [socketRef, connected, processSwing])
+
+  // -- Settings updaters -------------------------------------------------------
+  const updateLeadTime = useCallback((val: number) => {
+    leadTimeRef.current = val
+    setLeadTime(val)
+  }, [])
+
+  const updateHitWindow = useCallback((val: number) => {
+    hitWindowRef.current = val
+    setHitWindow(val)
+  }, [])
+
+  // -- Pause / resume ----------------------------------------------------------
+  const resumeGame = useCallback(() => {
+    setPaused(false)
+    audioRef.current?.play()
+  }, [])
+
+  const handleMenu = useCallback(() => {
+    const acc = hits + misses > 0 ? Math.round((hits / (hits + misses)) * 100) : 0
+    try {
+      localStorage.setItem('lastRunStats', JSON.stringify({ score, combo, hits, misses, accuracy: acc }))
+    } catch {}
+    cancelAnimationFrame(rafRef.current)
+    audioRef.current?.pause()
+    if (audioRef.current) audioRef.current.currentTime = 0
+    setPaused(false)
+    setPhase('idle')
+    setActiveNotes([])
+    setScore(0); setCombo(0); setHits(0); setMisses(0); setMultiplier(1)
+    nextNoteIndexRef.current = 0
+  }, [score, combo, hits, misses])
+
+  const handleExit = useCallback(() => {
+    try { window.close() } catch {}
+    // Fallback if browser blocks window.close()
+    handleMenu()
+  }, [handleMenu])
+
+  // -- Keyboard: 1/2/3 lanes, space swings, ESC pauses -------------------------
   useEffect(() => {
     if (phase !== 'playing') return
+    const setLane = (lane: number) => {
+      currentLaneRef.current = lane
+      setCurrentLane(lane)
+    }
     const onKey = (e: KeyboardEvent) => {
-      const map: Record<string, NoteDir> = {
-        ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down',
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        if (!pausedRef.current) {
+          // Pause the game
+          audioRef.current?.pause()
+          setPaused(true)
+          setPausePanel('menu')
+        } else if (pausePanelRef.current === 'settings') {
+          // ESC from settings → back to menu options
+          setPausePanel('menu')
+        } else {
+          // ESC from menu → resume
+          resumeGame()
+        }
+        return
       }
-      const dir = map[e.key]
-      if (dir) { e.preventDefault(); handleSwing(dir) }
+      if (pausedRef.current) return // block all other keys while paused
+      if (e.key === '1' || e.key === 'a' || e.key === 'A') { e.preventDefault(); setLane(0) }
+      else if (e.key === '2' || e.key === 's' || e.key === 'S') { e.preventDefault(); setLane(1) }
+      else if (e.key === '3' || e.key === 'd' || e.key === 'D') { e.preventDefault(); setLane(2) }
+      else if ([' ', 'ArrowUp', 'ArrowDown', 'Enter'].includes(e.key)) {
+        e.preventDefault(); processSwing()
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault(); setLane(Math.max(0, currentLaneRef.current - 1))
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault(); setLane(Math.min(2, currentLaneRef.current + 1))
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [phase, handleSwing])
+  }, [phase, processSwing, resumeGame])
 
-  // -- Phone motion -> swing ---------------------------------------------------
+  // -- Block depth: calc from audio time + leadTime ----------------------------
+  const blockZ = (note: ActiveNote, at: number) => {
+    const lt = leadTimeRef.current
+    const progress = Math.min((at - (note.time - lt)) / lt, 1)
+    return Z_SPAWN + progress * (Z_HIT - Z_SPAWN)
+  }
+
+  // -- Game loop: pauses when `paused` is true (effect re-runs on change) ------
   useEffect(() => {
-    if (!motion || phase !== 'playing') return
-
-    const { data: enriched, state: next, angSpeed } = enrichWithSlice(
-      motion,
-      sliceStateRef.current,
-      profileRef.current.threshold,
-    )
-    sliceStateRef.current = next
-
-    const dir   = enriched.sliceDirection as SliceDirection
-    const power = enriched.slicePower ?? 0
-
-    if (swingArmedRef.current && power >= SWING_ARM_POWER && dir !== 'none') {
-      swingArmedRef.current = false
-      // Record this swing speed for adaptive calibration
-      const updated = updateOnHit(profileRef.current, angSpeed)
-      setProfile(updated)
-      saveProfile(updated)
-      handleSwing(dir as NoteDir)
-    } else if (!swingArmedRef.current && power < SWING_RESET_POW) {
-      swingArmedRef.current = true
-    }
-
-    // Near-miss: phone moved fast but didn't cross threshold - loosen it
-    if (
-      swingArmedRef.current &&
-      motion.swingSpeed > 14 &&
-      angSpeed > profileRef.current.threshold * 0.65 &&
-      power < SWING_ARM_POWER
-    ) {
-      const updated = updateOnNearMiss(profileRef.current)
-      setProfile(updated)
-      saveProfile(updated)
-    }
-  }, [motion, phase, handleSwing])
-
-  // -- Game loop --------------------------------------------------------------
-  useEffect(() => {
-    if (phase !== 'playing' || !beatmap) return
+    if (phase !== 'playing' || !beatmap || paused) return
     const audio = audioRef.current
     if (!audio) return
 
     const tick = () => {
       const now = audio.currentTime
-      setAudioTime(now)
+      audioTimeRef.current = now
 
       // Spawn notes
       const notes = beatmap.notes
       while (
         nextNoteIndexRef.current < notes.length &&
-        notes[nextNoteIndexRef.current].time - LEAD_TIME <= now
+        notes[nextNoteIndexRef.current].time - leadTimeRef.current <= now
       ) {
         const note = notes[nextNoteIndexRef.current]
+        const lane = note.lane == null ? 1 : Math.max(0, Math.min(2, note.lane))
         setActiveNotes((prev) => [
           ...prev,
-          { ...note, id: ++noteIdCounter, hit: false, missed: false, exploding: false },
+          { time: note.time, lane, id: ++noteIdCounter, hit: false, missed: false, exploding: false },
         ])
         nextNoteIndexRef.current++
       }
 
       // Expire missed notes
-      setActiveNotes((prev) => {
-        let anyMissed = false
-        const updated = prev.map((n) => {
-          if (!n.hit && !n.missed && now > n.time + HIT_WINDOW) {
-            anyMissed = true
-            return { ...n, missed: true }
-          }
-          return n
+      let anyMissed = false
+      for (const n of activeNotesRef.current) {
+        if (!n.hit && !n.missed && now > n.time + hitWindowRef.current) { anyMissed = true; break }
+      }
+      if (anyMissed) {
+        setActiveNotes((prev) => {
+          const updated = prev.map((n) =>
+            !n.hit && !n.missed && now > n.time + hitWindowRef.current ? { ...n, missed: true } : n,
+          )
+          return updated
         })
-        if (anyMissed) {
-          setCombo(0); setMultiplier(1); setMisses((m) => m + 1)
-          showFeedback('Miss', false)
-          setTimeout(() => setActiveNotes((cur) => cur.filter((n) => !n.missed)), 300)
+        setCombo(0); setMultiplier(1); setMisses((m) => m + 1)
+        showFeedback('Miss', false)
+        setTimeout(() => setActiveNotes((cur) => cur.filter((n) => !n.missed)), 300)
+      }
+
+      // Lane detection from latest motion
+      const m = latestMotionRef.current
+      const cal = calibrationRef.current
+      if (m && cal && m.gamma != null) {
+        const smoothed = gammaSmootherRef.current.push(m.gamma)
+        const lane = laneFromGamma(smoothed, cal)
+        if (lane !== currentLaneRef.current) {
+          currentLaneRef.current = lane
+          setCurrentLane(lane)
         }
-        return updated
-      })
+      }
+
+      // Move blocks imperatively
+      const at = audioTimeRef.current
+      for (const n of activeNotesRef.current) {
+        if (n.hit || n.exploding || n.missed) continue
+        const el = blockRefs.current.get(n.id)
+        if (el) el.style.transform = `translate(-50%, -50%) translateZ(${blockZ(n, at)}px)`
+      }
+
+      updateSaber()
 
       if (
         audio.ended ||
@@ -314,7 +452,6 @@ export function RhythmGame({ motion }: Props) {
           now > (notes[notes.length - 1]?.time ?? 0) + 2)
       ) {
         setPhase('done')
-        submitSessionToServer(profileRef.current)
         return
       }
 
@@ -323,60 +460,81 @@ export function RhythmGame({ motion }: Props) {
 
     rafRef.current = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(rafRef.current)
-  }, [phase, beatmap, showFeedback])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, beatmap, paused, showFeedback])
 
-  // -- Start ------------------------------------------------------------------
-  const startGame = useCallback(async () => {
+  // -- Saber renderer ----------------------------------------------------------
+  const updateSaber = () => {
+    const anchor = saberAnchorRef.current
+    const rig = saberRigRef.current
+    const core = saberCoreRef.current
+    if (!anchor || !rig || !core) return
+
+    const s = saberStateRef.current
+    const m = latestMotionRef.current
+
+    const targetTiltX = m?.tiltX ?? s.tiltX
+    const targetTiltY = m?.tiltY ?? s.tiltY
+    const targetSpeed = m?.swingSpeed ?? 0
+    s.tiltX += (targetTiltX - s.tiltX) * SABER_LERP_SPEED
+    s.tiltY += (targetTiltY - s.tiltY) * SABER_LERP_SPEED
+    s.speed += (targetSpeed - s.speed) * SABER_LERP_SPEED
+
+    const swinging = performance.now() < swingFlashUntilRef.current
+
+    const screenLeft = clamp(50 + s.tiltX * 0.5, 14, 86)
+    const screenTop  = clamp(70 - s.tiltY * 0.45, 30, 78)
+
+    const baseRotZ = clamp(s.tiltX, -75, 75)
+    const baseRotX = clamp(s.tiltY * 0.5, -45, 45)
+    const finalRotZ = swinging ? baseRotZ - 55 : baseRotZ
+    const finalRotX = swinging ? baseRotX - 10 : baseRotX
+    const glow = 24 + Math.min(s.speed * 8, 50) + (swinging ? 30 : 0)
+
+    anchor.style.left = `${screenLeft}%`
+    anchor.style.top = `${screenTop}%`
+    rig.style.transform = `rotateZ(${finalRotZ}deg) rotateX(${finalRotX}deg)`
+    core.style.boxShadow = `0 0 ${glow}px #c4aaff`
+    rig.classList.toggle('rg-saber-rig--swinging', swinging)
+  }
+
+  // -- Flow: Idle -> Calibration -> Game ---------------------------------------
+  const goToCalibration = useCallback(() => {
+    setPhase('calibrating')
+  }, [])
+
+  const startGame = useCallback(async (cal?: LaneCalibration) => {
     if (!beatmap) return
+    if (cal) calibrationRef.current = cal
     const audio = new Audio('/song.mp3')
     audioRef.current = audio
     nextNoteIndexRef.current = 0
+    gammaSmootherRef.current.reset()
+    swingDetectorRef.current = createSimpleSwingDetector()
+    currentLaneRef.current = 1
+    setCurrentLane(1)
     setActiveNotes([]); setScore(0); setCombo(0)
-    setHits(0); setMisses(0); setMultiplier(1); setAudioTime(0)
+    setHits(0); setMisses(0); setMultiplier(1)
+    setPaused(false)
+    audioTimeRef.current = 0
     setPhase('playing')
     await audio.play()
   }, [beatmap])
 
-  // -- Block position: true CSS 3D perspective --------------------------------
-  // Blocks sit at their lane X and hit-zone Y, and fly toward the camera on Z.
-  // The arena has perspective + elevated perspective-origin so far blocks appear
-  // near the top of the screen and close blocks appear at the bottom — just like
-  // Beat Saber's vanishing-point approach.
-  //
-  // progress 0 = just spawned (deep in Z), 1 = arrived at hit zone (Z = 0)
-  const Z_SPAWN = -1400   // px back into the screen at spawn
-  const Z_HIT   =  120    // px in front of camera at hit (slightly past player)
-
-  const getBlockStyle = (note: ActiveNote): React.CSSProperties => {
-    const progress = Math.min(
-      (audioTime - (note.time - LEAD_TIME)) / LEAD_TIME,
-      1,
-    )
-    const laneX = LANE_X[note.lane] ?? 50
-    const z = Z_SPAWN + progress * (Z_HIT - Z_SPAWN)
-    const c = DIR_COLOR[note.direction]
-
-    return {
-      position: 'absolute',
-      left: `${laneX}%`,
-      top: '72%',           // fixed in the hit zone — perspective does the rest
-      transform: `translate(-50%, -50%) translateZ(${z}px)`,
-      width: '88px',
-      height: '88px',
-      borderRadius: '14px',
-      border: `3px solid ${c.border}`,
-      background: c.bg,
-      boxShadow: `0 0 18px ${c.glow}, inset 0 0 10px ${c.glow}`,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: '32px',
-      fontWeight: 900,
-      color: c.border,
-      opacity: note.missed ? 0 : 1,
-      // No zIndex needed — Z depth handles draw order naturally
-    }
-  }
+  // -- Static block style (transform set imperatively each frame) --------------
+  const getBlockStyle = (note: ActiveNote): React.CSSProperties => ({
+    position: 'absolute',
+    left: `${LANE_X[note.lane]}%`,
+    top: '72%',
+    transform: `translate(-50%, -50%) translateZ(${blockZ(note, audioTimeRef.current)}px)`,
+    width: '88px',
+    height: '88px',
+    borderRadius: '14px',
+    border: `3px solid ${NEON.border}`,
+    background: NEON.bg,
+    boxShadow: `0 0 18px ${NEON.glow}, inset 0 0 10px ${NEON.glow}`,
+    opacity: note.missed ? 0 : 1,
+  })
 
   const accuracy = hits + misses > 0 ? Math.round((hits / (hits + misses)) * 100) : 0
 
@@ -398,12 +556,12 @@ export function RhythmGame({ motion }: Props) {
             <span className={`rg-stat-val rg-mult-${multiplier}`}>x{multiplier}</span>
           </div>
           <div className="rg-stat">
+            <span className="rg-stat-label">Lane</span>
+            <span className="rg-stat-val rg-combo">{LANE_LABEL[currentLane]}</span>
+          </div>
+          <div className="rg-stat">
             <span className="rg-stat-label">Acc</span>
             <span className="rg-stat-val">{accuracy}%</span>
-          </div>
-          <div className="rg-stat" title={`Adaptive threshold: ${Math.round(profile.threshold)} deg/s (${profile.hitCount} swings learned)`}>
-            <span className="rg-stat-label">Sens</span>
-            <span className="rg-stat-val rg-sens">{Math.round(180 / profile.threshold * 10)}%</span>
           </div>
         </div>
       )}
@@ -415,6 +573,68 @@ export function RhythmGame({ motion }: Props) {
         </div>
       )}
 
+      {/* -- Pause menu -- */}
+      {phase === 'playing' && paused && (
+        <div className="rg-pause-overlay">
+          <div className="rg-pause-popup">
+            {pausePanel === 'menu' ? (
+              <>
+                <p className="rg-pause-title">paused</p>
+                <button className="rg-pause-btn" onClick={resumeGame}>Resume</button>
+                <button className="rg-pause-btn" onClick={() => setPausePanel('settings')}>Settings</button>
+                <button className="rg-pause-btn" onClick={handleMenu}>Menu</button>
+                <button className="rg-pause-btn rg-pause-btn--danger" onClick={handleExit}>Exit</button>
+              </>
+            ) : (
+              <>
+                <button className="rg-pause-back" onClick={() => setPausePanel('menu')}>
+                  ← back
+                </button>
+                <p className="rg-pause-title">settings</p>
+
+                <div className="rg-slider-group">
+                  <div className="rg-slider-row">
+                    <span className="rg-slider-label">Block Speed</span>
+                    <span className="rg-slider-val">{leadTime.toFixed(1)}s</span>
+                  </div>
+                  <div className="rg-slider-hints">
+                    <span>Fast</span><span>Slow</span>
+                  </div>
+                  <input
+                    type="range"
+                    className="rg-slider"
+                    min={1.5}
+                    max={3.5}
+                    step={0.1}
+                    value={leadTime}
+                    onChange={(e) => updateLeadTime(Number(e.target.value))}
+                  />
+                </div>
+
+                <div className="rg-slider-group">
+                  <div className="rg-slider-row">
+                    <span className="rg-slider-label">Hit Window</span>
+                    <span className="rg-slider-val">{hitWindow.toFixed(2)}s</span>
+                  </div>
+                  <div className="rg-slider-hints">
+                    <span>Strict</span><span>Forgiving</span>
+                  </div>
+                  <input
+                    type="range"
+                    className="rg-slider"
+                    min={0.15}
+                    max={0.55}
+                    step={0.05}
+                    value={hitWindow}
+                    onChange={(e) => updateHitWindow(Number(e.target.value))}
+                  />
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* -- Idle screen -- */}
       {phase === 'idle' && (
         <div className="rg-overlay">
@@ -423,25 +643,16 @@ export function RhythmGame({ motion }: Props) {
           <p className="rg-sub">
             {beatmap ? `${beatmap.notes.length} notes - ${beatmap.song}` : 'loading beatmap...'}
           </p>
-          <p className="rg-crowd-note">
-            {profile.hitCount > 0
-              ? `your style - ${profile.hitCount} swings learned`
-              : 'swing detection adapts to you as you play'
-            }
-          </p>
-          <p className="rg-hint">swing your phone or use arrow keys</p>
-          <button className="rg-start-btn" onClick={startGame} disabled={!beatmap}>
+          <p className="rg-hint">tilt your phone to switch lanes, swing to hit</p>
+          <button className="rg-start-btn" onClick={goToCalibration} disabled={!beatmap}>
             {'> play'}
           </button>
-          {profile.hitCount > 0 && (
-            <p className="rg-calibration-note">
-              calibrated from {profile.hitCount} swing{profile.hitCount !== 1 ? 's' : ''} *{' '}
-              <button className="rg-reset-cal" onClick={() => setProfile(resetProfile())}>
-                reset
-              </button>
-            </p>
-          )}
         </div>
+      )}
+
+      {/* -- Calibration screen -- */}
+      {phase === 'calibrating' && (
+        <CalibrationScreen motionRef={latestMotionRef} onComplete={(cal) => startGame(cal)} />
       )}
 
       {/* -- Done screen -- */}
@@ -454,37 +665,47 @@ export function RhythmGame({ motion }: Props) {
             <div><span>Hits</span>      <strong>{hits}</strong></div>
             <div><span>Misses</span>    <strong>{misses}</strong></div>
           </div>
-          <button className="rg-start-btn" onClick={startGame}>{'> Play Again'}</button>
+          <button className="rg-start-btn" onClick={() => startGame()}>{'> Play Again'}</button>
         </div>
       )}
 
       {/* -- Arena -- */}
       {phase === 'playing' && (
         <div className="rg-arena">
-          {/* Perspective grid floor */}
           <div className="rg-grid-floor" />
 
-          {/* Vanishing-point guide lines per lane */}
           {LANE_X.map((x, i) => (
-            <div key={i} className="rg-lane-guide" style={{ left: `${x}%` }} />
+            <div
+              key={i}
+              className={`rg-lane-col ${currentLane === i ? 'rg-lane-col--active' : ''}`}
+              style={{ left: `${x}%` }}
+            />
           ))}
 
-          {/* Hit zone line */}
           <div className="rg-hit-zone" />
 
-          {/* Approaching blocks */}
           {activeNotes.map((note) => (
             <div
               key={note.id}
+              ref={(el) => {
+                if (el) blockRefs.current.set(note.id, el)
+                else blockRefs.current.delete(note.id)
+              }}
               className={`rg-block ${note.exploding ? 'rg-block--explode' : ''} ${note.missed ? 'rg-block--missed' : ''}`}
               style={getBlockStyle(note)}
-            >
-              {DIR_ARROW[note.direction]}
-            </div>
+            />
           ))}
 
-          {/* Saber - free-moving */}
-          <FreeSaber motion={motion} lastSwingDir={lastSwingDir} />
+          <div className="rg-saber-anchor" ref={saberAnchorRef}>
+            <div className="rg-saber-rig" ref={saberRigRef}>
+              <div className="rg-saber-blade">
+                <div className="rg-blade-core" ref={saberCoreRef} />
+                <div className="rg-blade-glow" />
+              </div>
+              <div className="rg-saber-guard" />
+              <div className="rg-saber-handle" />
+            </div>
+          </div>
         </div>
       )}
     </div>

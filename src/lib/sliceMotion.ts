@@ -1,106 +1,169 @@
-import type { MotionData, SliceDirection } from '../types/motion'
+import type { MotionData } from '../types/motion'
 
-export type SliceTrackerState = {
-  prevTiltX: number
-  prevTiltY: number
-  prevTime: number
-  angVelX: number  // smoothed angular velocity deg/s on X axis (left/right)
-  angVelY: number  // smoothed angular velocity deg/s on Y axis (up/down)
+// =============================================================================
+// MOTION → GAME: swing detection + 3-lane tilt detection
+// =============================================================================
+// Two independent jobs, both driven by the phone's motion stream:
+//
+//   1) SWING  — did the phone move fast enough to count as a slash? One number
+//      (intensity) crossing one threshold, debounced so one physical swing fires
+//      exactly once. No direction.
+//
+//   2) LANE   — where is the player standing (left / center / right)? Read gamma
+//      (left/right tilt), smooth it, and compare against calibrated boundaries.
+// -----------------------------------------------------------------------------
+
+// --- Tunable constants -------------------------------------------------------
+export const SWING_THRESHOLD     = 8     // lower if swings don't register, raise if too sensitive
+export const REARM_DEBOUNCE_MS   = 200   // raise if one swing hits multiple blocks
+export const GAMMA_SMOOTH_WINDOW  = 4    // moving-average samples for lane detection; lower = snappier lane switching
+export const STABLE_THRESHOLD_DEG = 3    // degrees of stability needed for calibration; raise if calibration is too picky
+
+// accelerationIncludingGravity has magnitude ~9.81 at rest in any orientation,
+// so we measure acceleration BEYOND gravity: ~0 when still, spikes on a swing.
+const GRAVITY = 9.81
+
+// =============================================================================
+// SWING DETECTION (direction-agnostic, debounced)
+// =============================================================================
+//   IDLE ──(intensity > SWING_THRESHOLD)──▶ emit + COOLDOWN
+//   COOLDOWN ──(REARM_DEBOUNCE_MS elapsed)──▶ IDLE
+// -----------------------------------------------------------------------------
+
+export type SimpleSwingState = { cooldownUntil: number }
+
+export function createSimpleSwingDetector(): SimpleSwingState {
+  return { cooldownUntil: 0 }
 }
 
-// Default fallback - overridden by adaptive profile at call site
-const DEFAULT_ANG_VEL_THRESHOLD = 90
-
-export function createSliceTracker(): SliceTrackerState {
-  return {
-    prevTiltX: 0,
-    prevTiltY: 0,
-    prevTime: 0,
-    angVelX: 0,
-    angVelY: 0,
-  }
-}
-
-function directionFromAngularVelocity(vx: number, vy: number): SliceDirection {
-  if (Math.abs(vx) > Math.abs(vy)) {
-    return vx > 0 ? 'right' : 'left'
-  }
-  return vy > 0 ? 'down' : 'up'
-}
-
-export function enrichWithSlice(
+/**
+ * Feed one motion frame in. Returns swing=true EXACTLY ONCE per physical swing
+ * (then ignores motion for REARM_DEBOUNCE_MS). No direction — any swing counts.
+ */
+export function detectSwing(
   data: MotionData,
-  state: SliceTrackerState,
-  threshold = DEFAULT_ANG_VEL_THRESHOLD,
-): { data: MotionData; state: SliceTrackerState; angSpeed: number } {
+  state: SimpleSwingState,
+  threshold = SWING_THRESHOLD,
+): { state: SimpleSwingState; swing: boolean; intensity: number } {
   const now = data.timestamp || Date.now()
-  const dt = state.prevTime ? Math.max(0.008, (now - state.prevTime) / 1000) : 0.016
+  const intensity = Math.abs(data.swingSpeed - GRAVITY)
 
-  // Angular velocity in degrees/sec from tilt angle changes
-  const rawVelX = (data.tiltX - state.prevTiltX) / dt
-  const rawVelY = (data.tiltY - state.prevTiltY) / dt
+  // COOLDOWN: ignore everything until the debounce window passes.
+  if (now < state.cooldownUntil) return { state, swing: false, intensity }
 
-  // Light smoothing (0.4 new + 0.6 previous) - keeps it responsive
-  const angVelX = state.angVelX * 0.4 + rawVelX * 0.6
-  const angVelY = state.angVelY * 0.4 + rawVelY * 0.6
-
-  const angSpeed = Math.sqrt(angVelX * angVelX + angVelY * angVelY)
-
-  let sliceDirection: SliceDirection = 'none'
-  let slicePower = 0
-
-  if (angSpeed > threshold) {
-    sliceDirection = directionFromAngularVelocity(angVelX, angVelY)
-    slicePower = Math.min(1, (angSpeed - threshold) / 200)
+  if (intensity > threshold) {
+    state.cooldownUntil = now + REARM_DEBOUNCE_MS
+    return { state, swing: true, intensity }
   }
+  return { state, swing: false, intensity }
+}
 
-  // Also check raw accelerometer swing as a fallback
-  if (data.swingSpeed > 12) {
-    const fallbackPower = Math.min(1, (data.swingSpeed - 12) / 14)
-    if (fallbackPower > slicePower) {
-      slicePower = fallbackPower
-      if (sliceDirection === 'none') {
-        sliceDirection = directionFromAngularVelocity(angVelX, angVelY)
-      }
-    }
-  }
+// =============================================================================
+// LANE CALIBRATION + DETECTION (tilt left / center / right → lane 0 / 1 / 2)
+// =============================================================================
 
-  const nextState: SliceTrackerState = {
-    prevTiltX: data.tiltX,
-    prevTiltY: data.tiltY,
-    prevTime: now,
-    angVelX,
-    angVelY,
-  }
+export type LaneCalibration = {
+  leftAngle: number
+  centerAngle: number
+  rightAngle: number
+  leftBoundary: number
+  rightBoundary: number
+}
 
+/** Build a calibration from the three recorded gamma angles. */
+export function makeCalibration(
+  leftAngle: number,
+  centerAngle: number,
+  rightAngle: number,
+): LaneCalibration {
   return {
-    data: {
-      ...data,
-      velX: angVelX,
-      velY: angVelY,
-      sliceDirection,
-      slicePower,
-    },
-    state: nextState,
-    angSpeed,
+    leftAngle,
+    centerAngle,
+    rightAngle,
+    leftBoundary: (leftAngle + centerAngle) / 2,
+    rightBoundary: (centerAngle + rightAngle) / 2,
   }
 }
 
-export function sliceRotation(direction: SliceDirection, power: number) {
-  if (power < 0.1 || direction === 'none') {
-    return { rotateX: 0, rotateY: 0, rotateZ: 0, extendX: 0, extendY: 0 }
+/**
+ * Map a (smoothed) gamma angle to lane 0 (LEFT), 1 (CENTER), or 2 (RIGHT).
+ * Direction-aware: on some devices tilting left lowers gamma, on others it
+ * raises it. We key off the sign of (left → right) so calibration always works.
+ */
+export function laneFromGamma(gamma: number, cal: LaneCalibration): 0 | 1 | 2 {
+  const leftIsLower = cal.leftAngle <= cal.rightAngle
+  if (leftIsLower) {
+    if (gamma < cal.leftBoundary) return 0
+    if (gamma > cal.rightBoundary) return 2
+    return 1
   }
-  const p = power
-  switch (direction) {
-    case 'left':
-      return { rotateX: 8 * p, rotateY: -38 * p, rotateZ: -42 * p, extendX: -55 * p, extendY: 0 }
-    case 'right':
-      return { rotateX: 8 * p, rotateY: 38 * p, rotateZ: 42 * p, extendX: 55 * p, extendY: 0 }
-    case 'up':
-      return { rotateX: -48 * p, rotateY: 0, rotateZ: 0, extendX: 0, extendY: -55 * p }
-    case 'down':
-      return { rotateX: 48 * p, rotateY: 0, rotateZ: 0, extendX: 0, extendY: 55 * p }
-    default:
-      return { rotateX: 0, rotateY: 0, rotateZ: 0, extendX: 0, extendY: 0 }
+  // Inverted device: left tilt produces the larger gamma.
+  if (gamma > cal.leftBoundary) return 0
+  if (gamma < cal.rightBoundary) return 2
+  return 1
+}
+
+// --- Gamma smoother: moving average over the last GAMMA_SMOOTH_WINDOW samples
+export type GammaSmoother = { push: (g: number) => number; reset: () => void }
+
+export function createGammaSmoother(window = GAMMA_SMOOTH_WINDOW): GammaSmoother {
+  const buf: number[] = []
+  return {
+    push(g: number): number {
+      buf.push(g)
+      if (buf.length > window) buf.shift()
+      return buf.reduce((a, b) => a + b, 0) / buf.length
+    },
+    reset() {
+      buf.length = 0
+    },
   }
+}
+
+// =============================================================================
+// CALIBRATION STABILITY (gamma held still for a window → record the angle)
+// =============================================================================
+// "Stable" = gamma has not varied more than STABLE_THRESHOLD_DEG over the last
+// `windowMs`. Any movement beyond that resets the window.
+// -----------------------------------------------------------------------------
+
+export type StabilityTracker = { samples: Array<{ t: number; g: number }> }
+
+export function createStabilityTracker(): StabilityTracker {
+  return { samples: [] }
+}
+
+/**
+ * Feed one gamma reading. Returns `progress` (0→1, how much of the hold window
+ * has elapsed while staying still) and, once a full stable window is held,
+ * `angle` (the averaged gamma to record). Movement resets the window.
+ */
+export function pushStability(
+  tracker: StabilityTracker,
+  gamma: number,
+  now: number,
+  windowMs = 1000,
+): { angle: number | null; progress: number } {
+  tracker.samples.push({ t: now, g: gamma })
+
+  // Drop samples older than the hold window.
+  while (tracker.samples.length > 1 && now - tracker.samples[0].t > windowMs) {
+    tracker.samples.shift()
+  }
+
+  const gs = tracker.samples.map((s) => s.g)
+  const range = Math.max(...gs) - Math.min(...gs)
+
+  // Moved too much — restart the hold window from this sample.
+  if (range > STABLE_THRESHOLD_DEG) {
+    tracker.samples = [{ t: now, g: gamma }]
+    return { angle: null, progress: 0 }
+  }
+
+  const span = now - tracker.samples[0].t
+  const progress = Math.min(span / windowMs, 1)
+  if (span >= windowMs) {
+    return { angle: gs.reduce((a, b) => a + b, 0) / gs.length, progress: 1 }
+  }
+  return { angle: null, progress }
 }

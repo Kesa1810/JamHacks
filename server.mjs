@@ -303,6 +303,16 @@ async function start() {
       }
     })
 
+    socket.on('haptic', (data) => {
+      const { sessionId, role } = socket.data
+      if (sessionId && role === 'host') {
+        const session = sessions.get(sessionId)
+        if (session?.controller) {
+          io.to(session.controller).emit('haptic', data)
+        }
+      }
+    })
+
     socket.on('disconnect', () => {
       const { sessionId, role } = socket.data
       if (!sessionId) return
