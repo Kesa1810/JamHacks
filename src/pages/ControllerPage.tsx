@@ -169,6 +169,13 @@ export function ControllerPage() {
       {motionActive && (
         <div className="motion-active-panel">
           <p className="active-label">Swing your phone - saber follows on the computer</p>
+          <button
+            type="button"
+            className="pause-game-btn"
+            onClick={() => socketRef.current?.emit('pause-game')}
+          >
+            ❚❚ Pause Game
+          </button>
           <div className="motion-actions">
             <button type="button" className="recalibrate-btn" onClick={motion.recalibrate}>
               Reset center

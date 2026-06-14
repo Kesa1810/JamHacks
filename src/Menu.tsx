@@ -11,7 +11,7 @@ const Menu: React.FC<MenuProps> = ({ onPlay }) => {
     console.log(`${action} clicked`);
   };
 
-  const menuOptions = ['play / resume', 'choose map', 'settings', 'stats', 'credits', 'exit'];
+  const menuOptions = ['play / resume', 'choose map', 'settings', 'stats', 'exit'];
   const sparkles = Array.from({ length: 28 }, (_, index) => ({
     id: index,
     top: `${4 + (index * 5) % 86}%`,

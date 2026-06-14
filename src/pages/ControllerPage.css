@@ -209,6 +209,25 @@
   font-weight: 500;
 }
 
+.pause-game-btn {
+  display: block;
+  width: calc(100% - 2rem);
+  max-width: 320px;
+  margin: 0.5rem auto 0.75rem;
+  padding: 0.9rem 1rem;
+  border: none;
+  border-radius: 999px;
+  background: #f5c842;
+  color: #4a3728;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1rem;
+  letter-spacing: .03em;
+  touch-action: manipulation;
+  cursor: pointer;
+  transition: background .15s, transform .1s;
+}
+.pause-game-btn:hover { background: #e0b030; transform: scale(1.03); }
+
 .recalibrate-btn {
   padding: 0.5rem 1rem;
   border: 2px dashed #d8c898;

@@ -313,6 +313,16 @@ async function start() {
       }
     })
 
+    socket.on('pause-game', () => {
+      const { sessionId, role } = socket.data
+      if (sessionId && role === 'controller') {
+        const session = sessions.get(sessionId)
+        if (session?.host) {
+          io.to(session.host).emit('pause-game')
+        }
+      }
+    })
+
     socket.on('disconnect-controller', () => {
       const { sessionId, role } = socket.data
       if (sessionId && role === 'host') {

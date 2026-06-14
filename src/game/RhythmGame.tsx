@@ -259,6 +259,14 @@ export function RhythmGame({ socketRef, connected }: Props) {
   pausedRef.current     = paused
   pausePanelRef.current = pausePanel
 
+  // Stop audio when the component unmounts (e.g. controller disconnects mid-game)
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause()
+      cancelAnimationFrame(rafRef.current)
+    }
+  }, [])
+
   useEffect(() => {
     fetch('/beatmap.json')
       .then((r) => r.json())
@@ -339,8 +347,25 @@ export function RhythmGame({ socketRef, connected }: Props) {
       if (swing) processSwing()
     }
 
+    const onPause = () => {
+      if (phaseRef.current !== 'playing') return
+      if (pausedRef.current) {
+        // resume
+        audioRef.current?.play()
+        setPaused(false)
+      } else {
+        audioRef.current?.pause()
+        setPaused(true)
+        setPausePanel('menu')
+      }
+    }
+
     socket.on('motion', onMotion)
-    return () => { socket.off('motion', onMotion) }
+    socket.on('pause-game', onPause)
+    return () => {
+      socket.off('motion', onMotion)
+      socket.off('pause-game', onPause)
+    }
   }, [socketRef, connected, processSwing])
 
   // -- Settings updaters -------------------------------------------------------
@@ -534,15 +559,12 @@ export function RhythmGame({ socketRef, connected }: Props) {
     const screenLeft = clamp(50 + s.tiltX * 0.5, 14, 86)
     const screenTop  = clamp(70 - s.tiltY * 0.45, 30, 78)
 
-    const baseRotZ = clamp(s.tiltX, -75, 75)
-    const baseRotX = clamp(s.tiltY * 0.5, -45, 45)
-    const finalRotZ = swinging ? baseRotZ - 55 : baseRotZ
-    const finalRotX = swinging ? baseRotX - 10 : baseRotX
+    const rotZ = clamp(s.tiltX, -75, 75)
     const glow = 24 + Math.min(s.speed * 8, 50) + (swinging ? 30 : 0)
 
     anchor.style.left = `${screenLeft}%`
     anchor.style.top = `${screenTop}%`
-    rig.style.transform = `rotateZ(${finalRotZ}deg) rotateX(${finalRotX}deg)`
+    rig.style.transform = `rotateZ(${rotZ}deg)`
     core.style.boxShadow = `0 0 ${glow}px #f5d060`
     rig.classList.toggle('rg-saber-rig--swinging', swinging)
   }
