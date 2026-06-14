@@ -313,6 +313,16 @@ async function start() {
       }
     })
 
+    socket.on('disconnect-controller', () => {
+      const { sessionId, role } = socket.data
+      if (sessionId && role === 'host') {
+        const session = sessions.get(sessionId)
+        if (session?.controller) {
+          io.to(session.controller).emit('disconnect-controller')
+        }
+      }
+    })
+
     socket.on('disconnect', () => {
       const { sessionId, role } = socket.data
       if (!sessionId) return

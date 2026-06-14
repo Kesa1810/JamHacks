@@ -126,6 +126,16 @@ export function HostPage({ onExit }: HostPageProps) {
             <span className="status-dot" />
             phone connected *
           </div>
+          <button
+            type="button"
+            className="disconnect-btn"
+            onClick={() => {
+              socketRef.current?.emit('disconnect-controller')
+              setControllerConnected(false)
+            }}
+          >
+            Disconnect phone
+          </button>
         </div>
       )}
 

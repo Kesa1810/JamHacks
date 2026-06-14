@@ -51,7 +51,7 @@ interface ActiveNote {
   exploding: boolean
 }
 
-const NEON = { border: '#c4aaff', bg: '#1a0030', glow: '#c4aaff88' }
+const NEON = { border: '#f0a830', bg: '#1c1408', glow: '#f0a83055' }
 
 let noteIdCounter = 0
 
@@ -64,38 +64,52 @@ interface SaberState {
 }
 
 // --- Calibration screen -------------------------------------------------------
+interface SaberOffset { tiltX: number; tiltY: number }
+
 interface CalibrationProps {
   motionRef: React.RefObject<MotionData | null>
-  onComplete: (cal: LaneCalibration) => void
+  onComplete: (cal: LaneCalibration, saberOffset: SaberOffset) => void
 }
 
-const CAL_STEPS = [
-  { key: 'left',   label: 'LEFT lane',   instruction: 'Tilt your phone to the LEFT and hold still', arrow: '⟵' },
-  { key: 'center', label: 'CENTER lane', instruction: 'Hold your phone straight ahead (center)',     arrow: '•'  },
-  { key: 'right',  label: 'RIGHT lane',  instruction: 'Tilt your phone to the RIGHT and hold still',  arrow: '⟶' },
+const LANE_STEPS = [
+  { key: 'left',   label: 'LEFT lane',   instruction: 'Tilt your phone to the LEFT and hold still',  arrow: '⟵' },
+  { key: 'center', label: 'CENTER lane', instruction: 'Hold your phone straight ahead (center)',      arrow: '•'  },
+  { key: 'right',  label: 'RIGHT lane',  instruction: 'Tilt your phone to the RIGHT and hold still', arrow: '⟶' },
 ] as const
 
 function CalibrationScreen({ motionRef, onComplete }: CalibrationProps) {
-  const [step, setStep]         = useState(0)
+  // phase: 'saber' → center the laser, then 'lanes' → 3 lane steps, then 'done'
+  const [phase, setPhase]       = useState<'saber' | 'lanes' | 'done'>('saber')
+  const [laneStep, setLaneStep] = useState(0)
   const [progress, setProgress] = useState(0)
-  const [ready, setReady]       = useState(false)
   const [noSignal, setNoSignal] = useState(true)
-  const trackerRef  = useRef(createStabilityTracker())
-  const capturedRef = useRef<number[]>([])
-  const calRef      = useRef<LaneCalibration | null>(null)
-  const readyRef    = useRef(false)
 
+  const trackerRef    = useRef(createStabilityTracker())
+  const capturedRef   = useRef<number[]>([])
+  const calRef        = useRef<LaneCalibration | null>(null)
+  const saberOffRef   = useRef<SaberOffset>({ tiltX: 0, tiltY: 0 })
+  const doneRef       = useRef(false)
+
+  // Saber centering: button-based — user taps when the phone is in their playing position
+  const confirmSaberCenter = () => {
+    const m = motionRef.current
+    saberOffRef.current = { tiltX: m?.tiltX ?? 0, tiltY: m?.tiltY ?? 0 }
+    trackerRef.current = createStabilityTracker()
+    capturedRef.current = []
+    setProgress(0)
+    setPhase('lanes')
+  }
+
+  // Lane calibration: stability-based (same as before)
   useEffect(() => {
+    if (phase !== 'lanes') return
     let raf = 0
     const loop = () => {
       raf = requestAnimationFrame(loop)
-      if (readyRef.current) return
+      if (doneRef.current) return
 
       const m = motionRef.current
-      if (!m || m.gamma == null) {
-        setNoSignal(true)
-        return
-      }
+      if (!m || m.gamma == null) { setNoSignal(true); return }
       setNoSignal(false)
 
       const now = m.timestamp || Date.now()
@@ -110,24 +124,54 @@ function CalibrationScreen({ motionRef, onComplete }: CalibrationProps) {
       if (capturedRef.current.length >= 3) {
         const [l, c, r] = capturedRef.current
         calRef.current = makeCalibration(l, c, r)
-        readyRef.current = true
-        setReady(true)
+        doneRef.current = true
+        setPhase('done')
       } else {
-        setStep(capturedRef.current.length)
+        setLaneStep(capturedRef.current.length)
       }
     }
     raf = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(raf)
-  }, [motionRef])
+  }, [phase, motionRef])
 
-  const cur = CAL_STEPS[step]
+  // Saber phase: just show signal status in realtime
+  useEffect(() => {
+    if (phase !== 'saber') return
+    let raf = 0
+    const loop = () => {
+      raf = requestAnimationFrame(loop)
+      const m = motionRef.current
+      setNoSignal(!m || m.gamma == null)
+    }
+    raf = requestAnimationFrame(loop)
+    return () => cancelAnimationFrame(raf)
+  }, [phase, motionRef])
+
+  const cur = LANE_STEPS[laneStep]
 
   return (
     <div className="rg-overlay">
       <div className="rg-grid-floor" />
-      {!ready ? (
+
+      {phase === 'saber' && (
         <>
-          <p className="rg-cal-step">Step {step + 1} of 3 — {cur.label}</p>
+          <p className="rg-cal-step">Step 1 of 4 — Laser center</p>
+          <div className="rg-cal-arrow">⊕</div>
+          <h2 className="rg-cal-instruction">Hold your phone how you'll hold it while playing, then tap Set Center</h2>
+          <button
+            className="rg-start-btn"
+            disabled={noSignal}
+            onClick={confirmSaberCenter}
+          >
+            {noSignal ? 'waiting for phone…' : 'Set Center'}
+          </button>
+          <p className="rg-hint">This fixes the laser if it drifts left or right</p>
+        </>
+      )}
+
+      {phase === 'lanes' && (
+        <>
+          <p className="rg-cal-step">Step {laneStep + 2} of 4 — {cur.label}</p>
           <div className="rg-cal-arrow">{cur.arrow}</div>
           <h2 className="rg-cal-instruction">{cur.instruction}</h2>
           <div className="rg-cal-bar">
@@ -137,13 +181,15 @@ function CalibrationScreen({ motionRef, onComplete }: CalibrationProps) {
             {noSignal ? 'waiting for phone motion…' : 'hold steady to lock it in'}
           </p>
         </>
-      ) : (
+      )}
+
+      {phase === 'done' && (
         <>
           <h2 className="rg-title">Calibration done!</h2>
           <p className="rg-sub">You're ready. Tilt to move between lanes, swing to hit.</p>
           <button
             className="rg-start-btn"
-            onClick={() => calRef.current && onComplete(calRef.current)}
+            onClick={() => calRef.current && onComplete(calRef.current, saberOffRef.current)}
           >
             {'> Start Game'}
           </button>
@@ -197,6 +243,7 @@ export function RhythmGame({ socketRef, connected }: Props) {
   const audioTimeRef      = useRef(0)
 
   const latestMotionRef    = useRef<MotionData | null>(null)
+  const saberOffsetRef     = useRef<{ tiltX: number; tiltY: number }>({ tiltX: 0, tiltY: 0 })
   const saberStateRef      = useRef<SaberState>({ tiltX: 0, tiltY: 0, speed: 0 })
   const swingFlashUntilRef = useRef(0)
   const saberAnchorRef     = useRef<HTMLDivElement | null>(null)
@@ -321,6 +368,7 @@ export function RhythmGame({ socketRef, connected }: Props) {
     cancelAnimationFrame(rafRef.current)
     audioRef.current?.pause()
     if (audioRef.current) audioRef.current.currentTime = 0
+    saberOffsetRef.current = { tiltX: 0, tiltY: 0 }
     setPaused(false)
     setPhase('idle')
     setActiveNotes([])
@@ -473,8 +521,9 @@ export function RhythmGame({ socketRef, connected }: Props) {
     const s = saberStateRef.current
     const m = latestMotionRef.current
 
-    const targetTiltX = m?.tiltX ?? s.tiltX
-    const targetTiltY = m?.tiltY ?? s.tiltY
+    const off = saberOffsetRef.current
+    const targetTiltX = (m?.tiltX ?? s.tiltX) - off.tiltX
+    const targetTiltY = (m?.tiltY ?? s.tiltY) - off.tiltY
     const targetSpeed = m?.swingSpeed ?? 0
     s.tiltX += (targetTiltX - s.tiltX) * SABER_LERP_SPEED
     s.tiltY += (targetTiltY - s.tiltY) * SABER_LERP_SPEED
@@ -494,7 +543,7 @@ export function RhythmGame({ socketRef, connected }: Props) {
     anchor.style.left = `${screenLeft}%`
     anchor.style.top = `${screenTop}%`
     rig.style.transform = `rotateZ(${finalRotZ}deg) rotateX(${finalRotX}deg)`
-    core.style.boxShadow = `0 0 ${glow}px #c4aaff`
+    core.style.boxShadow = `0 0 ${glow}px #f5d060`
     rig.classList.toggle('rg-saber-rig--swinging', swinging)
   }
 
@@ -503,9 +552,10 @@ export function RhythmGame({ socketRef, connected }: Props) {
     setPhase('calibrating')
   }, [])
 
-  const startGame = useCallback(async (cal?: LaneCalibration) => {
+  const startGame = useCallback(async (cal?: LaneCalibration, saberOffset?: { tiltX: number; tiltY: number }) => {
     if (!beatmap) return
     if (cal) calibrationRef.current = cal
+    if (saberOffset) saberOffsetRef.current = saberOffset
     const audio = new Audio('/song.mp3')
     audioRef.current = audio
     nextNoteIndexRef.current = 0
@@ -652,7 +702,7 @@ export function RhythmGame({ socketRef, connected }: Props) {
 
       {/* -- Calibration screen -- */}
       {phase === 'calibrating' && (
-        <CalibrationScreen motionRef={latestMotionRef} onComplete={(cal) => startGame(cal)} />
+        <CalibrationScreen motionRef={latestMotionRef} onComplete={(cal, off) => startGame(cal, off)} />
       )}
 
       {/* -- Done screen -- */}
@@ -665,7 +715,8 @@ export function RhythmGame({ socketRef, connected }: Props) {
             <div><span>Hits</span>      <strong>{hits}</strong></div>
             <div><span>Misses</span>    <strong>{misses}</strong></div>
           </div>
-          <button className="rg-start-btn" onClick={() => startGame()}>{'> Play Again'}</button>
+          <button className="rg-start-btn" onClick={() => startGame()}>Play Again</button>
+          <button className="rg-start-btn rg-start-btn--secondary" onClick={handleMenu}>Return to Home</button>
         </div>
       )}
 

@@ -58,6 +58,18 @@ export function ControllerPage() {
     return () => window.removeEventListener('beforeunload', onBeforeUnload)
   }, [motionActive])
 
+  // Host-initiated disconnect — reset so a different phone can take over.
+  useEffect(() => {
+    const socket = socketRef.current
+    if (!socket) return
+    const onDisconnect = () => {
+      setMotionActive(false)
+      setShowModal(true)
+    }
+    socket.on('disconnect-controller', onDisconnect)
+    return () => { socket.off('disconnect-controller', onDisconnect) }
+  }, [socketRef, connected])
+
   // Haptic feedback — host emits 'haptic' after a hit, we vibrate the phone.
   // Silent-fail: navigator.vibrate is undefined on iOS and some browsers.
   useEffect(() => {

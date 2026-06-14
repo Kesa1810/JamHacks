@@ -1,6 +1,11 @@
+/* Animal Crossing host page theme */
+
 .host-page {
   min-height: 100vh;
   padding: 2rem;
+  font-family: 'Baloo 2', sans-serif;
+  background: #fdf6e3;
+  color: #4a3728;
 }
 
 .host-page--playing {
@@ -11,9 +16,10 @@
   padding: 0;
   margin: 0;
   overflow: hidden;
+  background: #110e08;
 }
 
-/* -- connect screen (waiting for phone) -- */
+/* -- connect screen -- */
 
 .connect-screen {
   max-width: 400px;
@@ -23,50 +29,56 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 0.6rem;
+  gap: 0.65rem;
 }
 
 .back-btn {
   align-self: flex-start;
-  background: none;
-  border: 1.5px solid #7a8a6a;
-  color: #7a8a6a;
-  padding: 0.3rem 0.85rem;
+  background: transparent;
+  border: 2px dashed #d8c898;
+  color: #9a8868;
+  padding: 0.3rem 1rem;
   border-radius: 999px;
   cursor: pointer;
-  font-size: 0.85rem;
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
   margin-bottom: 0.5rem;
-  transition: background 0.15s, color 0.15s;
+  transition: border-color .15s, color .15s;
 }
 .back-btn:hover {
-  background: #7a8a6a;
-  color: #0b110a;
+  border-color: #5db85c;
+  color: #5db85c;
+  background: transparent;
+  transform: none;
 }
 
 .connect-title {
   margin: 0;
-  font-size: 2rem;
-  font-weight: 800;
-  color: #c8d8a8;
-  letter-spacing: 0.04em;
+  font-family: 'Fredoka One', cursive;
+  font-size: 2.4rem;
+  color: #3a7832;
+  letter-spacing: .02em;
 }
 
 .connect-sub {
-  margin: 0 0 0.75rem;
-  color: #8a9a7a;
+  margin: 0 0 0.5rem;
+  font-family: 'Baloo 2', sans-serif;
+  color: #9a8868;
   font-size: 0.95rem;
+  font-weight: 500;
 }
 
-/* -- QR card -- */
+/* -- QR card — keep white so QR is readable, but shape it AC-style -- */
 
 .qr-card {
   display: flex;
   justify-content: center;
   padding: 1rem;
   background: #fff;
-  border-radius: 1.25rem;
+  border-radius: 1.5rem;
+  border: 3px dashed #b8d898;
   margin: 0.5rem 0;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.35);
 }
 
 .qr-placeholder {
@@ -74,7 +86,8 @@
   height: 200px;
   display: grid;
   place-items: center;
-  color: #555;
+  font-family: 'Baloo 2', sans-serif;
+  color: #9a8868;
   font-size: 0.9rem;
 }
 
@@ -82,18 +95,20 @@
 
 .session-label {
   margin: 0.5rem 0 0;
-  font-size: 0.7rem;
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: #6a7a5a;
+  letter-spacing: .16em;
+  color: #c4a868;
 }
 
 .session-id {
   margin: 0.1rem 0 0.5rem;
-  font-size: 1.6rem;
-  font-weight: 800;
-  letter-spacing: 0.22em;
-  color: #d4c9a8;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.8rem;
+  letter-spacing: .24em;
+  color: #3a7832;
 }
 
 /* -- link row -- */
@@ -108,44 +123,49 @@
 
 .controller-link {
   flex: 1;
+  font-family: 'Baloo 2', sans-serif;
   font-size: 0.75rem;
   word-break: break-all;
-  color: #8fb87a;
+  color: #5db85c;
   text-align: left;
 }
 
 .copy-btn {
   flex-shrink: 0;
-  padding: 0.4rem 0.85rem;
-  border: 1.5px solid #8fb87a;
+  padding: 0.4rem 0.9rem;
+  border: 2px solid #5db85c;
   border-radius: 999px;
-  background: none;
-  color: #8fb87a;
+  background: transparent;
+  color: #5db85c;
+  font-family: 'Baloo 2', sans-serif;
   font-weight: 700;
   font-size: 0.8rem;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background .15s, color .15s;
 }
 .copy-btn:hover {
-  background: #8fb87a;
-  color: #0b110a;
+  background: #5db85c;
+  color: #fff;
+  transform: none;
 }
 
 /* -- status notes -- */
 
 .network-note {
   margin: 0.25rem 0;
-  font-size: 0.82rem;
-  color: #a5d6a7;
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 0.84rem;
+  color: #5db85c;
 }
 
 .network-note.warn {
-  color: #d4a96a;
+  color: #c87c28;
 }
 
 .local-url-note {
+  font-family: 'Baloo 2', sans-serif;
   font-size: 0.75rem;
-  color: #6a7a5a;
+  color: #b8a878;
   word-break: break-all;
   margin: 0.25rem 0;
 }
@@ -154,35 +174,35 @@
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
-  font-size: 0.82rem;
-  color: #6a7a5a;
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 0.84rem;
+  color: #9a8868;
   width: 100%;
   margin: 0.25rem 0;
 }
 
 .ip-picker select {
   padding: 0.45rem;
-  border-radius: 0.5rem;
-  border: 1px solid #2a3a22;
-  background: #111a0f;
-  color: #d4c9a8;
-  font: inherit;
+  border-radius: 0.75rem;
+  border: 2px dashed #d8c898;
+  background: #fdf6e3;
+  color: #4a3728;
+  font-family: 'Baloo 2', sans-serif;
 }
 
 /* -- tips -- */
 
 .tips {
   margin: 0.5rem 0 0;
-  padding-left: 1.1rem;
-  color: #6a7a5a;
+  padding-left: 1.2rem;
+  font-family: 'Baloo 2', sans-serif;
+  color: #b8a878;
   font-size: 0.88rem;
   text-align: left;
   width: 100%;
 }
 
-.tips li + li {
-  margin-top: 0.3rem;
-}
+.tips li + li { margin-top: 0.3rem; }
 
 /* -- playing HUD -- */
 
@@ -191,30 +211,55 @@
   top: 1rem;
   right: 1rem;
   z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.disconnect-btn {
+  padding: 6px 14px;
+  border: 2px dashed #e8b898;
+  border-radius: 999px;
+  background: transparent;
+  color: #c87850;
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color .12s, color .12s;
+}
+.disconnect-btn:hover {
+  border-color: #c84838;
+  color: #c84838;
+  background: transparent;
+  transform: none;
 }
 
 .status-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.45rem 0.9rem;
+  padding: 0.45rem 1rem;
   border-radius: 999px;
-  background: #111a0f;
-  border: 1.5px solid #2a3a22;
-  color: #8a9a7a;
+  background: rgba(253,246,227,0.9);
+  border: 2px solid #d8c898;
+  font-family: 'Baloo 2', sans-serif;
+  color: #b8a878;
   font-size: 0.85rem;
+  font-weight: 600;
   white-space: nowrap;
 }
 
 .status-pill.online {
-  color: #a5d6a7;
-  border-color: #4caf7055;
-  background: #0e1f10;
+  color: #3a7832;
+  border-color: #8fd47e;
+  background: rgba(253,246,227,0.92);
 }
 
 .status-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: currentColor;
 }
