@@ -199,26 +199,15 @@ async function startReliableTunnel(port) {
     return null
   }
 
-  const preferLocaltunnel = process.platform === 'win32'
-
-  if (preferLocaltunnel) {
-    const backup = await tryStart('Localtunnel backup', () => startLocaltunnel(port))
-    if (backup) return backup
-  }
-
+  // Cloudflare first — localtunnel often shows "tunnel unavailable" on phones.
   const first = await tryStart('Cloudflare tunnel', () => startCloudflaredTunnel(port))
   if (first) return first
 
   const retry = await tryStart('Cloudflare tunnel retry', () => startCloudflaredTunnel(port))
   if (retry) return retry
 
-  if (!preferLocaltunnel) {
-    const backup = await tryStart('Localtunnel backup', () => startLocaltunnel(port))
-    if (backup) return backup
-  } else {
-    const backup = await tryStart('Localtunnel retry', () => startLocaltunnel(port))
-    if (backup) return backup
-  }
+  const backup = await tryStart('Localtunnel backup', () => startLocaltunnel(port))
+  if (backup) return backup
 
   throw new Error('Tunnel unavailable')
 }

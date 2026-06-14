@@ -427,7 +427,13 @@
 .rg-block {
   pointer-events: none;
   will-change: transform;
-  transform-style: preserve-3d;
+  z-index: 4;
+}
+
+.rg-block canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .rg-block--explode {

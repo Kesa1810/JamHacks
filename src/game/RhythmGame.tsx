@@ -12,6 +12,7 @@ import {
   SWING_THRESHOLD,
   type LaneCalibration,
 } from '../lib/sliceMotion'
+import { GlbCube } from './GlbBlocksLayer'
 import './RhythmGame.css'
 
 // --- Tunable defaults (runtime-adjustable via settings sliders) ---------------
@@ -50,8 +51,6 @@ interface ActiveNote {
   missed: boolean
   exploding: boolean
 }
-
-const NEON = { border: '#f0a830', bg: '#1c1408', glow: '#f0a83055' }
 
 let noteIdCounter = 0
 
@@ -593,7 +592,7 @@ export function RhythmGame({ socketRef, connected }: Props) {
     await audio.play()
   }, [beatmap])
 
-  // -- Static block style (transform set imperatively each frame) --------------
+  // -- Block container (GLB cube inside; transform set imperatively) ------------
   const getBlockStyle = (note: ActiveNote): React.CSSProperties => ({
     position: 'absolute',
     left: `${LANE_X[note.lane]}%`,
@@ -601,10 +600,6 @@ export function RhythmGame({ socketRef, connected }: Props) {
     transform: `translate(-50%, -50%) translateZ(${blockZ(note, audioTimeRef.current)}px)`,
     width: '88px',
     height: '88px',
-    borderRadius: '14px',
-    border: `3px solid ${NEON.border}`,
-    background: NEON.bg,
-    boxShadow: `0 0 18px ${NEON.glow}, inset 0 0 10px ${NEON.glow}`,
     opacity: note.missed ? 0 : 1,
   })
 
@@ -766,7 +761,9 @@ export function RhythmGame({ socketRef, connected }: Props) {
               }}
               className={`rg-block ${note.exploding ? 'rg-block--explode' : ''} ${note.missed ? 'rg-block--missed' : ''}`}
               style={getBlockStyle(note)}
-            />
+            >
+              <GlbCube />
+            </div>
           ))}
 
           <div className="rg-saber-anchor" ref={saberAnchorRef}>
